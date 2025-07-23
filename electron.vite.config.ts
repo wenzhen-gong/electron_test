@@ -21,7 +21,7 @@ export default defineConfig({
     }
   },
   renderer: {
-    root: '.',
+    root: './renderer',
     build: {
       rollupOptions: {
         input: {
