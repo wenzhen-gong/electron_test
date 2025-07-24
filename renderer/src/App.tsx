@@ -1,35 +1,42 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+// renderer/src/App.tsx
+import { useState } from 'react';
 
-function App(): React.JSX.Element {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+function App() {
+  const [url, setUrl] = useState('');
+  const [concurrency, setConcurrency] = useState(5);
+  const [count, setCount] = useState(10);
+  const [result, setResult] = useState<any>(null);
+
+  const runTest = async () => {
+    const config = {
+      url,
+      concurrency,
+      count,
+      method: "GET",
+      payload: "",
+      headers: {},
+    };
+    const res = await window.api.runLoadTest(config);
+    setResult(res);
+  };
 
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
+    <div className="p-8">
+      <h1 className="text-2xl mb-4">Server Load Tester</h1>
+      <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Target URL" className="border p-2 w-full mb-4" />
+      <input type="number" value={concurrency} onChange={(e) => setConcurrency(Number(e.target.value))} placeholder="Concurrency" className="border p-2 w-full mb-4" />
+      <input type="number" value={count} onChange={(e) => setCount(Number(e.target.value))} placeholder="Total Requests" className="border p-2 w-full mb-4" />
+      <button onClick={runTest} className="bg-blue-500 text-white px-4 py-2">Start Test</button>
+
+      {result && (
+        <div className="mt-6">
+          <p>✅ Success: {result.success}</p>
+          <p>❌ Failures: {result.failures}</p>
+          <p>⏱ Avg Response Time: {result.avgTimeMs.toFixed(2)} ms</p>
         </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
-    </>
-  )
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
