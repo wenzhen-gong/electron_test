@@ -12,5 +12,6 @@
       "@/*": ["renderer/src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts","*.d.ts","electron"]
+    "include": ["electron", "renderer", "global.d.ts"]
+
 }
