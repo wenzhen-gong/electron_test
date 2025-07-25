@@ -27,6 +27,7 @@ ipcMain.handle('run-load-test', async (_event, config) => {
     child.stdout.on('data', (data) => (output += data))
     child.stderr.on('data', (data) => console.error(data.toString()))
     child.on('close', () => {
+      console.log(output)
       try {
         const result = JSON.parse(output)
         resolve(result)
