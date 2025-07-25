@@ -1,24 +1,24 @@
 // renderer/src/App.tsx
-import { useState } from 'react';
+import { useState } from 'react'
 
 function App() {
-  const [url, setUrl] = useState('');
-  const [concurrency, setConcurrency] = useState(5);
-  const [count, setCount] = useState(10);
-  const [result, setResult] = useState<any>(null);
+  const [url, setUrl] = useState('')
+  const [concurrency, setConcurrency] = useState(5)
+  const [count, setCount] = useState(10)
+  const [result, setResult] = useState<any>(null)
 
   const runTest = async () => {
     const config = {
       url,
       concurrency,
       count,
-      method: "GET",
-      payload: "",
-      headers: {},
-    };
-    const res = await window.api.runLoadTest(config);
-    setResult(res);
-  };
+      method: 'GET',
+      payload: '',
+      headers: {}
+    }
+    const res = await window.api.runLoadTest(config)
+    setResult(res)
+  }
 
   return (
     <div className="p-8">
@@ -39,4 +39,4 @@ function App() {
   );
 }
 
-export default App;
+export default App
