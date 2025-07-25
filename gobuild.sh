@@ -1,2 +1,2 @@
-go build -o loadtester scripts/test.go
+go build -o loadtester scripts/loadtester.go
 mv loadtester out
