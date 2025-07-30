@@ -1,11 +1,38 @@
+
 import './assets/main.css'
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App'
+import App from './legacy/App'  // 或根据实际情况用新版 App
+import { Provider } from 'react-redux'
+import store from './legacy/redux/store'
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { setData } from './legacy/redux/dataSlice';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-)
+async function bootstrap() {
+  const data = await window.electronAPI.readDataFile();
+  store.dispatch(setData(JSON.parse(data)));
+
+  const darkTheme = createTheme({
+    palette: { mode: 'dark' },
+  });
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <Provider store={store}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </Provider>
+    </StrictMode>
+  );
+}
+
+bootstrap();
+
