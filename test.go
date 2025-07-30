@@ -26,8 +26,8 @@ type Result struct {
 }
 
 func main() {
-	CONCURRENCY := 2
-	COUNT := 3
+	CONCURRENCY := 1
+	COUNT := 1
 	var wg sync.WaitGroup
 	times := make([]time.Duration, COUNT)
 	success := 0
@@ -45,9 +45,9 @@ func main() {
 
 			body := strings.NewReader("{\"name\":\"test\"}")
 
-			headers := map[string]string{"Content-Type": "application/json", "X-Test": "Hello"}
+			headers := map[string]string{"Content-Type": "application/json", "test-header": "Hello"}
 
-			req, _ := http.NewRequest("GET", "https://httpbin.org/get", body)
+			req, _ := http.NewRequest("POST", "https://httpbin.org/post", body)
 
 			for k, v := range headers {
 				req.Header.Set(k, v)
