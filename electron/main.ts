@@ -2,10 +2,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import { spawn } from 'child_process'
+import fs from 'fs'
 
 let mainWindow: BrowserWindow
 
 app.whenReady().then(() => {
+
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -37,3 +39,13 @@ ipcMain.handle('run-load-test', async (_event, config) => {
     })
   })
 })
+
+
+ipcMain.handle("read-data-file", () => {
+  const filePath = path.join(app.getAppPath(), "datafile.json");
+  return fs.readFileSync(filePath, "utf8");
+});
+
+ipcMain.on("write-data-file", (event, content) => {
+  fs.writeFileSync(path.join(__dirname, "../datafile.json"), content);
+});
