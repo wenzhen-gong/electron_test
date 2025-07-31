@@ -4,7 +4,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"sync"
@@ -29,6 +28,7 @@ type Result struct {
 func main() {
 	var config Config
 	decoder := json.NewDecoder(os.Stdin)
+
 	if err := decoder.Decode(&config); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to decode config: %v\n", err)
 		os.Exit(1)
@@ -49,7 +49,7 @@ func main() {
 			defer func() { <-sem }()
 			defer wg.Done()
 
-			req, _ := http.NewRequest(config.Method, config.URL, io.NopCloser(nil))
+			req, _ := http.NewRequest(config.Method, config.URL, nil)
 			for k, v := range config.Headers {
 				req.Header.Set(k, v)
 			}
