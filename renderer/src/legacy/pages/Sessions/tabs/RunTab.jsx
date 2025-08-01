@@ -49,7 +49,9 @@ const RunTab = () => {
         return;
       }
     console.log("updatedConfig to pass to core logic: ", updatedConfig)
-    const result = await window.electronAPI.kaskadestart(updatedConfig);
+    // const result = await window.electronAPI.kaskadestart(updatedConfig);
+    const result = await window.api.runLoadTest(updatedConfig)
+
     console.log(result)
     store.dispatch(setDemoData(result));
       //updatedConfig state is an object that should be able to be passed as our existing configFile format
