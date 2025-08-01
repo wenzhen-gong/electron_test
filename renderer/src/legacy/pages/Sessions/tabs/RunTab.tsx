@@ -13,7 +13,7 @@ const RunTab = () => {
   // const datafile = useSelector((state) => state.data.datafile);
   const configFile = useSelector((state) => state.data.configFile);
 
-  // console.log("Current configFile on Runtab:", configFile);
+  console.log("Current configFile on Runtab:", configFile);
 
 
   // State to manage input values
@@ -22,7 +22,6 @@ const RunTab = () => {
   const [concurrentUsersInput, setConcurrentUsersInput] = useState(0);
   const [numOfWorkersInput, setNumOfWorkersInput] = useState(0);
   const [updatedConfig, setUpdatedConfig] = useState(configFile);
-
 
   const handleInputChange = (inputName, inputValue) => {
     const updatedConfigCopy = { ...updatedConfig };

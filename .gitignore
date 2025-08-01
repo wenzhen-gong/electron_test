@@ -5,3 +5,5 @@ out
 .eslintcache
 *.log*
 package-lock.json
+eslint.config.mjs
+.prettierignore
