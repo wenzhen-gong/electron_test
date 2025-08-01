@@ -48,9 +48,18 @@ const RunTab = () => {
       ) {
         return;
       }
+
+      const config = {
+      url:"fakeurl",
+      concurrency:5,
+      count:10,
+      method: 'GET',
+      payload: '',
+      headers: {}
+    }
     console.log("updatedConfig to pass to core logic: ", updatedConfig)
     // const result = await window.electronAPI.kaskadestart(updatedConfig);
-    const result = await window.api.runLoadTest(updatedConfig)
+    const result = await window.api.runLoadTest(config)
 
     console.log(result)
     store.dispatch(setDemoData(result));

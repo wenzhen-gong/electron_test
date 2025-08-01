@@ -15,7 +15,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { setData } from './legacy/redux/dataSlice';
 
 async function bootstrap() {
-  const data = await window.electronAPI.readDataFile();
+  const data = await window.api.readDataFile();
   store.dispatch(setData(JSON.parse(data)));
 
   const darkTheme = createTheme({
