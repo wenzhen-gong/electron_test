@@ -1,129 +1,117 @@
-import React, { useState } from "react";
-import store from '../../../redux/store';
-import { useDispatch, useSelector } from "react-redux";
-import { setDemoData, setRunTabData } from "../../../redux/dataSlice";
-import { useParams, useNavigate } from 'react-router-dom';
-
+import React, { useState } from 'react'
+import store from '../../../redux/store'
+import { useDispatch, useSelector } from 'react-redux'
+import { setDemoData, setRunTabData } from '../../../redux/dataSlice'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Box, TextField, Button, Stack } from '@mui/material'
 
 const RunTab = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const params = useParams();
-  const sessionId = params.id;
-  // const datafile = useSelector((state) => state.data.datafile);
-  const configFile = useSelector((state) => state.data.configFile);
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const params = useParams()
+  const sessionId = params.id
 
-  console.log("Current configFile on Runtab:", configFile);
+  const runTabConfig = useSelector((state) => state.data.runTabConfig)
 
+  // local states to manage input values, would be redundant to manage centrally...
+  const [URL, setURL] = useState('')
+  const [testDuration, setTestDuration] = useState(0)
+  const [concurrencyNumber, setConcurrencyNumber] = useState(0)
+  const [totalRequests, setTotalRequests] = useState(0)
 
-  // State to manage input values
-  const [serverInput, setServerInput] = useState([]);
-  const [testDurationInput, setTestDurationInput] = useState(0);
-  const [concurrentUsersInput, setConcurrentUsersInput] = useState(0);
-  const [numOfWorkersInput, setNumOfWorkersInput] = useState(0);
-  const [updatedConfig, setUpdatedConfig] = useState(configFile);
-
+  // use setRunTabData reducer to manage runTabConfig state centrally
   const handleInputChange = (inputName, inputValue) => {
-    const updatedConfigCopy = { ...updatedConfig };
-
-    if (inputName === "servers") {
-      updatedConfigCopy.servers = inputValue.split(',').map(item => item.trim());
+    const config = { ...runTabConfig }
+    if (inputName === 'URL') {
+      config.URL = inputValue
     } else {
-      updatedConfigCopy[inputName] = parseInt(inputValue);
+      config[inputName] = parseInt(inputValue)
     }
-    console.log(updatedConfigCopy)
-    setUpdatedConfig(updatedConfigCopy);
-  };
-
-  // console.log("updatedConfig: ", updatedConfig)
-
-  const handleRunButton = async () =>{
-    //primative check to make sure the user filled out the config inputs. handler function will not execute 
-    //if user doesn't fill out expected parameters
-    if (
-      updatedConfig.testDuration === 0 ||
-      updatedConfig.concurrentUsers === 0 ||
-      updatedConfig.numOfWorkers === 0
-      ) {
-        return;
-      }
-
-      const config = {
-      url:"fakeurl",
-      concurrency:5,
-      count:10,
-      method: 'GET',
-      payload: '',
-      headers: {}
-    }
-    console.log("updatedConfig to pass to core logic: ", updatedConfig)
-    // const result = await window.electronAPI.kaskadestart(updatedConfig);
-    const result = await window.api.runLoadTest(config)
-
-    console.log(result)
-    store.dispatch(setDemoData(result));
-      //updatedConfig state is an object that should be able to be passed as our existing configFile format
+    store.dispatch(setRunTabData(config))
   }
 
 
+  const handleRunButton = async () => {
+
+    console.log('runTabConfig before Run: ', runTabConfig)
+    // const result = await window.electronAPI.kaskadestart(updatedConfig);
+    const result = await window.api.runLoadTest(runTabConfig)
+    console.log(result)
+  }
+
   return (
-    <div>
-      <h2>Run Tab</h2>
-      <form>
-        <label>
-          Servers:
-          <input
-            type="text"
-            value={serverInput}
-            onChange={(e) => {
-              setServerInput(e.target.value);
-              handleInputChange("servers", e.target.value);
-            }}
-          />
-        </label>
-        <br />
-        <label>
-          Test Duration:
-          <input
-            type="number"
-            value={testDurationInput}
-            onChange={(e) => {
-              setTestDurationInput(e.target.value);
-              handleInputChange("testDuration", e.target.value);
-            }}
-          />
-        </label>
-        <br />
-        <label>
-          Concurrent Users:
-          <input
-            type="number"
-            value={concurrentUsersInput}
-            onChange={(e) => {
-              setConcurrentUsersInput(e.target.value);
-              handleInputChange("concurrentUsers", e.target.value);
-            }}
-          />
-        </label>
-        <br />
-        <label>
-          Number of Workers:
-          <input
-            type="number"
-            value={numOfWorkersInput}
-            onChange={(e) => {
-              setNumOfWorkersInput(e.target.value);
-              handleInputChange("numOfWorkers", e.target.value);
-            }}
-          />
-        </label>
-        <br />
-      </form>
+    <Box
+      component="form"
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        width: '300px', // 统一宽度
+        marginLeft: '20px' // ⬅️ 靠左，距离左边 20px
+      }}
+    >
+      <TextField
+        label="URL"
+        variant="outlined"
+        value={URL}
+        onChange={(e) => {
+          setURL(e.target.value)
+          handleInputChange('URL', e.target.value)
+        }}
+        fullWidth
+      />
 
-        <button type="button" onClick={handleRunButton}>Run</button>
-        <button onClick={() => { navigate("/result/" + sessionId + "/" + 1660926192826 )}}>Result</button>
-    </div>
-  );
-};
+      <TextField
+        label="Test Duration"
+        type="number"
+        variant="outlined"
+        value={testDuration}
+        onChange={(e) => {
+          setTestDuration(e.target.value)
+          handleInputChange('testDuration', e.target.value)
+        }}
+        fullWidth
+      />
 
-export default RunTab;
+      <TextField
+        label="ConcurrencyNumber Number"
+        type="number"
+        variant="outlined"
+        value={concurrencyNumber}
+        onChange={(e) => {
+          setConcurrencyNumber(e.target.value)
+          handleInputChange('concurrencyNumber', e.target.value)
+        }}
+        fullWidth
+      />
+
+      <TextField
+        label="Total Requests"
+        type="number"
+        variant="outlined"
+        value={totalRequests}
+        onChange={(e) => {
+          setTotalRequests(e.target.value)
+          handleInputChange('totalRequests', e.target.value)
+        }}
+        fullWidth
+      />
+      <Stack direction="row" spacing={2} sx={{ marginTop: 2 }} justifyContent="flex-start">
+        <Button variant="contained" color="primary" onClick={handleRunButton}>
+          Run
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => {
+            navigate('/result/' + sessionId + '/' + 1660926192826)
+          }}
+        >
+          Result
+        </Button>
+      </Stack>
+    </Box>
+  )
+}
+
+export default RunTab

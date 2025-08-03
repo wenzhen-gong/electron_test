@@ -23,24 +23,23 @@ app.whenReady().then(() => {
 
 ipcMain.handle('run-load-test', async (_event, config) => {
   console.log(config)
-  // return new Promise((resolve, reject) => {
-  //   const child = spawn(path.join(__dirname, '..', 'loadtester'))
-  //   child.stdin.write(JSON.stringify(config))
-  //   child.stdin.end()
+  return new Promise((resolve, reject) => {
+    const child = spawn(path.join(__dirname, '..', 'loadtester'))
+    child.stdin.write(JSON.stringify(config))
+    child.stdin.end()
 
-  //   let output = ''
-  //   child.stdout.on('data', (data) => (output += data))
-  //   child.stderr.on('data', (data) => console.error(data.toString()))
-  //   child.on('close', () => {
-  //     console.log(output)
-  //     try {
-  //       const result = JSON.parse(output)
-  //       resolve(result)
-  //     } catch (err) {
-  //       reject(err)
-  //     }
-  //   })
-  // })
+    let output = ''
+    child.stdout.on('data', (data) => (output += data))
+    child.stderr.on('data', (data) => console.error(data.toString()))
+    child.on('close', () => {
+      try {
+        const result = JSON.parse(output)
+        resolve(result)
+      } catch (err) {
+        reject(err)
+      }
+    })
+  })
 })
 
 
