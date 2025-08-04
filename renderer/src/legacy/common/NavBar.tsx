@@ -15,12 +15,16 @@ const NavDiv = styled.div`
     flex-direction: column;
 `;
 
-const NavBarDiv = (props) => {
+interface NavBarProps {
+    page: String
+}
+
+const NavBarDiv : React.FC<NavBarProps> = (props: NavBarProps) => {
     const navigate = useNavigate();
 
     // Configure button styles.
-    const sessionButtonStyle = { display: "flex", flexDirection: "column", width: "90px", height: "90px", flexShrink: 0, color: "#FFF", padding: "10px" };
-    const historyButtonStyle = { display: "flex", flexDirection: "column", width: "90px", height: "90px", flexShrink: 0, color: "#FFF", padding: "5px" };
+    const sessionButtonStyle = { display: "flex", flexDirection: "column", width: "90px", height: "90px", flexShrink: 0, color: "#FFF", padding: "10px", backgroundColor: "" };
+    const historyButtonStyle = { display: "flex", flexDirection: "column", width: "90px", height: "90px", flexShrink: 0, color: "#FFF", padding: "5px" , backgroundColor: ""};
     // Highlight selected button.
     if (props.page === "sessions") {
         sessionButtonStyle.backgroundColor = "rgba(255, 255, 255, 0.20)";

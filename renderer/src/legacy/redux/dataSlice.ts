@@ -1,17 +1,28 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { flushSync } from 'react-dom'
 
-const initialState = {
-  datafile: [], // Initial state that'll be updated to action payload (datafile)
-  runTabConfig: {}
+interface Request {
+  
 }
 
-export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
-  const state = thunkAPI.getState()
-  console.log('state in runTest Thunk: ', state.runTabConfig)
-  const result = await window.api.runLoadTest(state.runTabConfig)
-  return result
-})
+interface Session {
+  "sessionId": number,
+  "sessionName": string
+  "overview": string,
+  "createdBy": string,
+  "createdOn": number,
+  "lastModified": number,
+  "servers": string[],
+  "requests"?: Request[],
+  "history"?: History[]
+}
+
+interface State {
+  datafile: Session[]
+}
+const initialState: State = {
+  datafile: [] // Initial state that'll be updated to action payload (datafile)
+};
 
 const dataSlice = createSlice({
   name: 'datafile',
@@ -29,13 +40,13 @@ const dataSlice = createSlice({
       state.configFile = action.payload
     },
     createSession: (state, action) => {
-      const newSession = {}
-      newSession.sessionId = Date.now()
-      newSession.sessionName = 'New Session'
-      newSession.requests = []
-      newSession.createdOn = newSession.sessionId
-      newSession.lastModified = newSession.sessionId
-      state.datafile.push(newSession)
+      const newSession = {};
+      newSession.sessionId = Date.now();
+      newSession.sessionName = "New Session";
+      newSession.requests = [];
+      newSession.createdOn = newSession.sessionId;
+      newSession.lastModified = newSession.sessionId;
+      state.datafile.push(newSession);
 
       // call main process to write data file
       window.electronAPI.writeDataFile(JSON.stringify(state.datafile))
@@ -55,13 +66,13 @@ const dataSlice = createSlice({
       window.electronAPI.writeDataFile(JSON.stringify(state.datafile))
     },
     duplicateSession: (state, action) => {
-      const oldSession = action.payload
-      const newSession = JSON.parse(JSON.stringify(oldSession))
-      newSession.sessionId = Date.now()
-      newSession.sessionName = 'Copy of ' + newSession.sessionName
-      newSession.createdOn = newSession.sessionId
-      newSession.lastModified = newSession.sessionId
-      state.datafile.push(newSession)
+      const oldSession = action.payload;
+      const newSession = JSON.parse(JSON.stringify(oldSession));
+      newSession.sessionId = Date.now();
+      newSession.sessionName = "Copy of " + newSession.sessionName;
+      newSession.createdOn = newSession.sessionId;
+      newSession.lastModified = newSession.sessionId;
+      state.datafile.push(newSession);
 
       // call main process to write data file
       window.electronAPI.writeDataFile(JSON.stringify(state.datafile))
@@ -70,16 +81,29 @@ const dataSlice = createSlice({
       const sessionId = action.payload
       for (let i = 0; i < state.datafile.length; i++) {
         if (state.datafile[i].sessionId == sessionId) {
-          state.datafile.splice(i, 1)
+          state.datafile.splice(i, 1);
+        }
+      }
+
+      // call main process to write data file
+      window.electronAPI.writeDataFile(JSON.stringify(state.datafile));
+    },
+    renameSession: (state, action) => {
+      const sessionId = action.payload.sessionId;
+      const newName = action.payload.newName;
+      for (let i = 0; i < state.datafile.length; i++) {
+        if (state.datafile[i].sessionId == sessionId) {
+          state.datafile[i].sessionName = newName;
+          break;
         }
       }
 
       // call main process to write data file
       window.electronAPI.writeDataFile(JSON.stringify(state.datafile))
     },
-    renameSession: (state, action) => {
-      const sessionId = action.payload.sessionId
-      const newName = action.payload.newName
+    updateSessionOverview: (state, action) => {
+      const sessionId = action.payload.sessionId;
+      const newOverview = action.payload.newOverview;
       for (let i = 0; i < state.datafile.length; i++) {
         if (state.datafile[i].sessionId == sessionId) {
           state.datafile[i].sessionName = newName
@@ -90,22 +114,9 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.electronAPI.writeDataFile(JSON.stringify(state.datafile))
     },
-    updateSessionOverview: (state, action) => {
-      const sessionId = action.payload.sessionId
-      const newOverview = action.payload.newOverview
-      for (let i = 0; i < state.datafile.length; i++) {
-        if (state.datafile[i].sessionId == sessionId) {
-          state.datafile[i].overview = newOverview
-          break
-        }
-      }
-
-      // call main process to write data file
-      window.electronAPI.writeDataFile(JSON.stringify(state.datafile))
-    },
     deleteRequest: (state, action) => {
-      const sessionId = action.payload.sessionId
-      const requestId = action.payload.requestId
+      const sessionId = action.payload.sessionId;
+      const requestId = action.payload.requestId;
       for (let i = 0; i < state.datafile.length; i++) {
         if (state.datafile[i].sessionId == sessionId) {
           for (let j = 0; j < state.datafile[i].requests.length; j++) {
