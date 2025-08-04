@@ -11,10 +11,10 @@ import (
 )
 
 type Config struct {
-	URL         string            `json:"url"`
-	Concurrency int               `json:"concurrency"`
-	Count       int               `json:"count"`
-	Method      string            `json:"method"`
+	URL         string            `json:"URL"`
+	Concurrency int               `json:"concurrencyNumber"`
+	Count       int               `json:"totalRequests"`
+	Method      string            `json:"httpMethod"`
 	Payload     string            `json:"payload"`
 	Headers     map[string]string `json:"headers"`
 }

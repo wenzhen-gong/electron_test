@@ -6,7 +6,6 @@ import Button from '@mui/material/Button';
 import { createSession } from '../redux/dataSlice';
 import AddIcon from '@mui/icons-material/Add';
 
-
 const SessionsSideDiv = styled.div`
     display:flex;
     flex-direction: column;
@@ -14,7 +13,7 @@ const SessionsSideDiv = styled.div`
 
 const SessionsSide = () => {
     const dispatch = useDispatch();
-    const sessionState = useSelector((state) => state.data.datafile);
+    const sessionState = useSelector((state) => state.datafile);
 
     console.log("SessionsSide sessionState: ", sessionState)
 

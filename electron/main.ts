@@ -7,14 +7,11 @@ import fs from 'fs'
 let mainWindow: BrowserWindow
 
 app.whenReady().then(() => {
-
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
-      // contextIsolation: true,
-      // nodeIntegration: false
+      preload: path.join(__dirname, '../preload/index.js')
     }
   })
 
@@ -23,32 +20,30 @@ app.whenReady().then(() => {
 
 ipcMain.handle('run-load-test', async (_event, config) => {
   console.log(config)
-  // return new Promise((resolve, reject) => {
-  //   const child = spawn(path.join(__dirname, '..', 'loadtester'))
-  //   child.stdin.write(JSON.stringify(config))
-  //   child.stdin.end()
+  return new Promise((resolve, reject) => {
+    const child = spawn(path.join(__dirname, '..', 'loadtester'))
+    child.stdin.write(JSON.stringify(config))
+    child.stdin.end()
 
-  //   let output = ''
-  //   child.stdout.on('data', (data) => (output += data))
-  //   child.stderr.on('data', (data) => console.error(data.toString()))
-  //   child.on('close', () => {
-  //     console.log(output)
-  //     try {
-  //       const result = JSON.parse(output)
-  //       resolve(result)
-  //     } catch (err) {
-  //       reject(err)
-  //     }
-  //   })
-  // })
+    let output = ''
+    child.stdout.on('data', (data) => (output += data))
+    child.stderr.on('data', (data) => console.error(data.toString()))
+    child.on('close', () => {
+      try {
+        const result = JSON.parse(output)
+        resolve(result)
+      } catch (err) {
+        reject(err)
+      }
+    })
+  })
 })
 
+ipcMain.handle('read-data-file', () => {
+  const filePath = path.join(app.getAppPath(), 'datafile.json')
+  return fs.readFileSync(filePath, 'utf8')
+})
 
-ipcMain.handle("read-data-file", () => {
-  const filePath = path.join(app.getAppPath(), "datafile.json");
-  return fs.readFileSync(filePath, "utf8");
-});
-
-ipcMain.on("write-data-file", (event, content) => {
-  fs.writeFileSync(path.join(__dirname, "../datafile.json"), content);
-});
+ipcMain.on('write-data-file', (event, content) => {
+  fs.writeFileSync(path.join(__dirname, '../datafile.json'), content)
+})

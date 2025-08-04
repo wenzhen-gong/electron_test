@@ -45,7 +45,7 @@ const HeadBar = () => {
     const navigate = useNavigate();
 
     // Get all sessions from data file.
-    const allSessions = useSelector(state => state.data.datafile);
+    const allSessions = useSelector(state => state.datafile);
 
     // Prepare all search values for the autocomplete search bar.
     const allValues = [];
