@@ -7,14 +7,11 @@ import fs from 'fs'
 let mainWindow: BrowserWindow
 
 app.whenReady().then(() => {
-
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
-      // contextIsolation: true,
-      // nodeIntegration: false
+      preload: path.join(__dirname, '../preload/index.js')
     }
   })
 
@@ -42,12 +39,11 @@ ipcMain.handle('run-load-test', async (_event, config) => {
   })
 })
 
+ipcMain.handle('read-data-file', () => {
+  const filePath = path.join(app.getAppPath(), 'datafile.json')
+  return fs.readFileSync(filePath, 'utf8')
+})
 
-ipcMain.handle("read-data-file", () => {
-  const filePath = path.join(app.getAppPath(), "datafile.json");
-  return fs.readFileSync(filePath, "utf8");
-});
-
-ipcMain.on("write-data-file", (event, content) => {
-  fs.writeFileSync(path.join(__dirname, "../datafile.json"), content);
-});
+ipcMain.on('write-data-file', (event, content) => {
+  fs.writeFileSync(path.join(__dirname, '../datafile.json'), content)
+})

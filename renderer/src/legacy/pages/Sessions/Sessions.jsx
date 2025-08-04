@@ -50,7 +50,7 @@ const SessionsDiv = styled.div`
 `
 
 const Sessions = () => {
-  const configFile = useSelector((state) => state.data.configFile)
+  const configFile = useSelector((state) => state.configFile)
   console.log('Current configFile on SessionTab:', configFile)
   // Get the session Id from URL parameters.
   const params = useParams()
@@ -58,9 +58,9 @@ const Sessions = () => {
 
   // Get the session name to display on the title bar.
   const sessionName = useSelector((state) => {
-    for (let i = 0; i < state.data.datafile.length; i++) {
-      if (state.data.datafile[i].sessionId == sessionId) {
-        return state.data.datafile[i].sessionName
+    for (let i = 0; i < state.datafile.length; i++) {
+      if (state.datafile[i].sessionId == sessionId) {
+        return state.datafile[i].sessionName
       }
     }
     return null

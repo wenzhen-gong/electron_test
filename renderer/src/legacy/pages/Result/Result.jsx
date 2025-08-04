@@ -26,11 +26,11 @@ const Result = (props) => {
 
     // Get the state of this session.
     const resultState = useSelector((state) => {
-        for (let i = 0; i < state.data.datafile.length; i++) {
-            if (state.data.datafile[i].sessionId == sessionId) {
-                for (let j = 0; j < state.data.datafile[i].history.length; j++) {
-                    if (state.data.datafile[i].history[j].timestamp == runId) {
-                        return state.data.datafile[i].history[j]
+        for (let i = 0; i < state.datafile.length; i++) {
+            if (state.datafile[i].sessionId == sessionId) {
+                for (let j = 0; j < state.datafile[i].history.length; j++) {
+                    if (state.datafile[i].history[j].timestamp == runId) {
+                        return state.datafile[i].history[j]
                     }
                 }
             }
@@ -38,7 +38,7 @@ const Result = (props) => {
         return null;
     });
     //console.log("result State: ", resultState)
-    const demoData = useSelector((state) => { return state.data.demo });
+    const demoData = useSelector((state) => { return state.demo });
     //console.log("demoData: ", demoData)
 
     if (!resultState) {

@@ -71,9 +71,9 @@ const OverviewTab = (props) => {
 
     // Get the state of this session.
     const overviewState = useSelector((state) => {
-        for (let i = 0; i < state.data.datafile.length; i++) {
-            if (state.data.datafile[i].sessionId == sessionId) {
-                return state.data.datafile[i];
+        for (let i = 0; i < state.datafile.length; i++) {
+            if (state.datafile[i].sessionId == sessionId) {
+                return state.datafile[i];
             }
         }
         return null;

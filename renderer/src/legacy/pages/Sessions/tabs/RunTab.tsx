@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import store from '../../../redux/store'
 import { useDispatch, useSelector } from 'react-redux'
-import { setDemoData, setRunTabData } from '../../../redux/dataSlice'
+import { setDemoData, setRunTabData, runTest } from '../../../redux/dataSlice'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Box, TextField, Button, Stack } from '@mui/material'
+import { Box, TextField, Button, Stack, Select, MenuItem, InputLabel, FormControl, OutlinedInput } from '@mui/material'
 
 const RunTab = () => {
   const dispatch = useDispatch()
@@ -11,9 +11,10 @@ const RunTab = () => {
   const params = useParams()
   const sessionId = params.id
 
-  const runTabConfig = useSelector((state) => state.data.runTabConfig)
+  const runTabConfig = useSelector((state) => state.runTabConfig)
 
   // local states to manage input values, would be redundant to manage centrally...
+  const [httpMethod, setHttpMethod] = useState('')
   const [URL, setURL] = useState('')
   const [testDuration, setTestDuration] = useState(0)
   const [concurrencyNumber, setConcurrencyNumber] = useState(0)
@@ -24,19 +25,12 @@ const RunTab = () => {
     const config = { ...runTabConfig }
     if (inputName === 'URL') {
       config.URL = inputValue
+    } else if (inputName === 'httpMethod') {
+      config.httpMethod = inputValue
     } else {
       config[inputName] = parseInt(inputValue)
     }
     store.dispatch(setRunTabData(config))
-  }
-
-
-  const handleRunButton = async () => {
-
-    console.log('runTabConfig before Run: ', runTabConfig)
-    // const result = await window.electronAPI.kaskadestart(updatedConfig);
-    const result = await window.api.runLoadTest(runTabConfig)
-    console.log(result)
   }
 
   return (
@@ -50,6 +44,24 @@ const RunTab = () => {
         marginLeft: '20px' // ⬅️ 靠左，距离左边 20px
       }}
     >
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="method-label">HTTP Method</InputLabel>
+        <Select
+          labelId="method-label"
+          value={httpMethod}
+          onChange={(e) => {
+            setHttpMethod(e.target.value);
+            handleInputChange("httpMethod", e.target.value);
+          }}
+          input={<OutlinedInput label="HTTP Method" />}
+
+        >
+          <MenuItem value="GET">GET</MenuItem>
+          <MenuItem value="POST">POST</MenuItem>
+          <MenuItem value="PUT">PUT</MenuItem>
+          <MenuItem value="DELETE">DELETE</MenuItem>
+        </Select>
+      </FormControl>
       <TextField
         label="URL"
         variant="outlined"
@@ -74,7 +86,7 @@ const RunTab = () => {
       />
 
       <TextField
-        label="ConcurrencyNumber Number"
+        label="Concurrency Number"
         type="number"
         variant="outlined"
         value={concurrencyNumber}
@@ -97,7 +109,7 @@ const RunTab = () => {
         fullWidth
       />
       <Stack direction="row" spacing={2} sx={{ marginTop: 2 }} justifyContent="flex-start">
-        <Button variant="contained" color="primary" onClick={handleRunButton}>
+        <Button variant="contained" color="primary" onClick={() => dispatch(runTest())}>
           Run
         </Button>
         <Button

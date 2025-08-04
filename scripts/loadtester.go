@@ -14,7 +14,7 @@ type Config struct {
 	URL         string            `json:"URL"`
 	Concurrency int               `json:"concurrencyNumber"`
 	Count       int               `json:"totalRequests"`
-	Method      string            `json:"method"`
+	Method      string            `json:"httpMethod"`
 	Payload     string            `json:"payload"`
 	Headers     map[string]string `json:"headers"`
 }

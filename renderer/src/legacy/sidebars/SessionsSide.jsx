@@ -13,7 +13,7 @@ const SessionsSideDiv = styled.div`
 
 const SessionsSide = () => {
     const dispatch = useDispatch();
-    const sessionState = useSelector((state) => state.data.datafile);
+    const sessionState = useSelector((state) => state.datafile);
 
     console.log("SessionsSide sessionState: ", sessionState)
 

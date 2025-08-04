@@ -30,12 +30,11 @@ const OutletContainer = styled.div`
 `
 
 const App = (props) => {
-  console.log('✅ Legacy App is rendering')
 
   // Find the first session in data file, so we can redirect the initial page to the first session.
   const firstSessionId = useSelector((state) => {
-    if (state.data.datafile.length > 0) {
-      return state.data.datafile[0].sessionId
+    if (state.datafile.length > 0) {
+      return state.datafile[0].sessionId
     }
     return null
   })
