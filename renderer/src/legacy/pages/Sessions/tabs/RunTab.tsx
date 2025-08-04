@@ -1,37 +1,47 @@
-import React, { useState } from 'react'
-import store from '../../../redux/store'
-import { useDispatch, useSelector } from 'react-redux'
-import { setDemoData, setRunTabData, runTest } from '../../../redux/dataSlice'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Box, TextField, Button, Stack, Select, MenuItem, InputLabel, FormControl, OutlinedInput } from '@mui/material'
+import React, { useState } from 'react';
+import store from '../../../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setDemoData, setRunTabData, runTest } from '../../../redux/dataSlice';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  TextField,
+  Button,
+  Stack,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  OutlinedInput
+} from '@mui/material';
 
 const RunTab = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const params = useParams()
-  const sessionId = params.id
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const params = useParams();
+  const sessionId = params.id;
 
-  const runTabConfig = useSelector((state) => state.runTabConfig)
+  const runTabConfig = useSelector((state) => state.runTabConfig);
 
   // local states to manage input values, would be redundant to manage centrally...
-  const [httpMethod, setHttpMethod] = useState('')
-  const [URL, setURL] = useState('')
-  const [testDuration, setTestDuration] = useState(0)
-  const [concurrencyNumber, setConcurrencyNumber] = useState(0)
-  const [totalRequests, setTotalRequests] = useState(0)
+  const [httpMethod, setHttpMethod] = useState('');
+  const [URL, setURL] = useState('');
+  const [testDuration, setTestDuration] = useState(0);
+  const [concurrencyNumber, setConcurrencyNumber] = useState(0);
+  const [totalRequests, setTotalRequests] = useState(0);
 
   // use setRunTabData reducer to manage runTabConfig state centrally
   const handleInputChange = (inputName, inputValue) => {
-    const config = { ...runTabConfig }
+    const config = { ...runTabConfig };
     if (inputName === 'URL') {
-      config.URL = inputValue
+      config.URL = inputValue;
     } else if (inputName === 'httpMethod') {
-      config.httpMethod = inputValue
+      config.httpMethod = inputValue;
     } else {
-      config[inputName] = parseInt(inputValue)
+      config[inputName] = parseInt(inputValue);
     }
-    store.dispatch(setRunTabData(config))
-  }
+    store.dispatch(setRunTabData(config));
+  };
 
   return (
     <Box
@@ -51,10 +61,9 @@ const RunTab = () => {
           value={httpMethod}
           onChange={(e) => {
             setHttpMethod(e.target.value);
-            handleInputChange("httpMethod", e.target.value);
+            handleInputChange('httpMethod', e.target.value);
           }}
           input={<OutlinedInput label="HTTP Method" />}
-
         >
           <MenuItem value="GET">GET</MenuItem>
           <MenuItem value="POST">POST</MenuItem>
@@ -67,8 +76,8 @@ const RunTab = () => {
         variant="outlined"
         value={URL}
         onChange={(e) => {
-          setURL(e.target.value)
-          handleInputChange('URL', e.target.value)
+          setURL(e.target.value);
+          handleInputChange('URL', e.target.value);
         }}
         fullWidth
       />
@@ -79,8 +88,8 @@ const RunTab = () => {
         variant="outlined"
         value={testDuration}
         onChange={(e) => {
-          setTestDuration(e.target.value)
-          handleInputChange('testDuration', e.target.value)
+          setTestDuration(e.target.value);
+          handleInputChange('testDuration', e.target.value);
         }}
         fullWidth
       />
@@ -91,8 +100,8 @@ const RunTab = () => {
         variant="outlined"
         value={concurrencyNumber}
         onChange={(e) => {
-          setConcurrencyNumber(e.target.value)
-          handleInputChange('concurrencyNumber', e.target.value)
+          setConcurrencyNumber(e.target.value);
+          handleInputChange('concurrencyNumber', e.target.value);
         }}
         fullWidth
       />
@@ -103,8 +112,8 @@ const RunTab = () => {
         variant="outlined"
         value={totalRequests}
         onChange={(e) => {
-          setTotalRequests(e.target.value)
-          handleInputChange('totalRequests', e.target.value)
+          setTotalRequests(e.target.value);
+          handleInputChange('totalRequests', e.target.value);
         }}
         fullWidth
       />
@@ -116,14 +125,14 @@ const RunTab = () => {
           variant="outlined"
           color="secondary"
           onClick={() => {
-            navigate('/result/' + sessionId + '/' + 1660926192826)
+            navigate('/result/' + sessionId + '/' + 1660926192826);
           }}
         >
           Result
         </Button>
       </Stack>
     </Box>
-  )
-}
+  );
+};
 
-export default RunTab
+export default RunTab;

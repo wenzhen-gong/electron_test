@@ -1,49 +1,48 @@
-import React from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
-import styled from 'styled-components'
-import HeadBar from './common/HeadBar.jsx'
-import NavBar from './common/NavBar.jsx'
-import SideBar from './sidebars/SideBar.jsx'
-import History from './pages/History/History.jsx'
-import Sessions from './pages/Sessions/Sessions.jsx'
-import Requests from './pages/Requests/Requests.jsx'
-import Result from './pages/Result/Result.jsx'
-import { useSelector } from 'react-redux'
+import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import styled from 'styled-components';
+import HeadBar from './common/HeadBar.jsx';
+import NavBar from './common/NavBar.jsx';
+import SideBar from './sidebars/SideBar.jsx';
+import History from './pages/History/History.jsx';
+import Sessions from './pages/Sessions/Sessions.jsx';
+import Requests from './pages/Requests/Requests.jsx';
+import Result from './pages/Result/Result.jsx';
+import { useSelector } from 'react-redux';
 
 const PageContainer = styled.div`
   background-color: #000000;
   color: #ffffff;
   width: 100%;
   height: 100vh;
-`
+`;
 
 const MainContainer = styled.div`
   display: flex;
   flex-direction: row;
   height: calc(100vh - 50px);
-`
+`;
 
 const OutletContainer = styled.div`
   background-color: #1e1e1e;
   width: 100%;
-`
+`;
 
 const App = (props) => {
-
   // Find the first session in data file, so we can redirect the initial page to the first session.
   const firstSessionId = useSelector((state) => {
     if (state.datafile.length > 0) {
-      return state.datafile[0].sessionId
+      return state.datafile[0].sessionId;
     }
-    return null
-  })
+    return null;
+  });
 
   // The overall page layout.
   const Layout = (props) => {
     //没有地址栏，但是可以用useLocation追踪当前url
-    const location = useLocation()
-    console.log('Current URL:', location.pathname)
+    const location = useLocation();
+    console.log('Current URL:', location.pathname);
     return (
       <PageContainer>
         <HeadBar />
@@ -55,8 +54,8 @@ const App = (props) => {
           </OutletContainer>
         </MainContainer>
       </PageContainer>
-    )
-  }
+    );
+  };
 
   // Define react router rules.
   return (
@@ -82,7 +81,7 @@ const App = (props) => {
         </Routes>
       </Router>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
