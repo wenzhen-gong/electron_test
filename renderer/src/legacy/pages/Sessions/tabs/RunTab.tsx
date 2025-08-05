@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import store from '../../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setDemoData, setRunTabData, runTest } from '../../../redux/dataSlice';
+import { setValidUserInput, setRunTabData, runTest } from '../../../redux/dataSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -12,7 +12,8 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  OutlinedInput
+  OutlinedInput,
+  Typography
 } from '@mui/material';
 
 const RunTab = () => {
@@ -22,6 +23,7 @@ const RunTab = () => {
   const sessionId = params.id;
 
   const runTabConfig = useSelector((state) => state.runTabConfig);
+  const validUserInput = useSelector((state) => state.validUserInput);
 
   // local states to manage input values, would be redundant to manage centrally...
   const [httpMethod, setHttpMethod] = useState('');
@@ -41,6 +43,46 @@ const RunTab = () => {
       config[inputName] = parseInt(inputValue);
     }
     store.dispatch(setRunTabData(config));
+  };
+
+  const validateUserInput = () => {
+    // 校验 httpMethod
+    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+    if (
+      typeof runTabConfig.httpMethod !== 'string' ||
+      !allowedMethods.includes(runTabConfig.httpMethod.toUpperCase())
+    ) {
+      store.dispatch(
+        setValidUserInput({
+          valid: false,
+          error: 'httpMethod must be one of GET, POST, PUT, DELETE'
+        })
+      );
+      return;
+    }
+
+    // 校验 URL
+    if (
+      typeof runTabConfig.URL !== 'string' ||
+      !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(runTabConfig.URL)
+    ) {
+      store.dispatch(setValidUserInput({ valid: false, error: 'URL must be a valid string URL' }));
+      return;
+    }
+    // 校验必须为正整数的字段
+    const positiveIntegerFields = ['testDuration', 'concurrencyNumber', 'totalRequests'];
+    for (const field of positiveIntegerFields) {
+      if (!Number.isInteger(runTabConfig[field]) || runTabConfig[field] <= 0) {
+        store.dispatch(
+          setValidUserInput({ valid: false, error: `${field} must be a positive integer` })
+        );
+        return;
+      }
+    }
+
+    // 如果所有检查通过
+    store.dispatch(setValidUserInput({ valid: true }));
+    return;
   };
 
   return (
@@ -118,7 +160,16 @@ const RunTab = () => {
         fullWidth
       />
       <Stack direction="row" spacing={2} sx={{ marginTop: 2 }} justifyContent="flex-start">
-        <Button variant="contained" color="primary" onClick={() => dispatch(runTest())}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            validateUserInput();
+            if (validUserInput.valid) {
+              dispatch(runTest());
+            }
+          }}
+        >
           Run
         </Button>
         <Button
@@ -131,6 +182,11 @@ const RunTab = () => {
           Result
         </Button>
       </Stack>
+      {validUserInput.error && (
+        <Typography variant="body2" sx={{ color: 'error.main', marginTop: 1, marginLeft: '20px' }}>
+          {validUserInput.error}
+        </Typography>
+      )}
     </Box>
   );
 };
