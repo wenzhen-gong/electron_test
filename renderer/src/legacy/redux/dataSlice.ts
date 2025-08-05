@@ -1,12 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { flushSync } from 'react-dom'
+import {Request, Session, State} from '../model'
 
-const initialState = {
+const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {}
 }
 
-export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
+export const runTest = createAsyncThunk<
+any,             // 返回值类型（你可以改成具体类型）
+void,            // 参数类型
+{ state: State } // thunkAPI 类型
+>('datafile/runTest', async (_, thunkAPI) => {
   const state = thunkAPI.getState()
   console.log('state in runTest Thunk: ', state.runTabConfig)
   const result = await window.api.runLoadTest(state.runTabConfig)
@@ -29,12 +34,19 @@ const dataSlice = createSlice({
       state.configFile = action.payload
     },
     createSession: (state, action) => {
-      const newSession = {}
-      newSession.sessionId = Date.now()
-      newSession.sessionName = 'New Session'
-      newSession.requests = []
-      newSession.createdOn = newSession.sessionId
-      newSession.lastModified = newSession.sessionId
+    
+      const sessionId = Date.now();
+      const newSession: Session = {
+        sessionId: sessionId,
+        sessionName: 'New Session',
+        overview: '',             // or some default text
+        createdBy: 'anonymous',   // or actual user
+        createdOn: sessionId,
+        lastModified: sessionId,
+        requests: [],
+        servers: [],
+        history: []
+      };
       state.datafile.push(newSession)
 
       // call main process to write data file
@@ -42,10 +54,13 @@ const dataSlice = createSlice({
     },
     addRequest: (state, action) => {
       const sessionId = action.payload
-      const newRequest = {}
-      newRequest.requestId = Date.now()
-      newRequest.requestName = 'New Request'
-      newRequest.method = 'GET'
+      const requestId = Date.now();
+      const newRequest: Request = {
+        requestId: requestId,
+        requestName: 'New Request',
+        method: 'GET',
+        url: ''
+      }
       for (let i = 0; i < state.datafile.length; i++) {
         if (state.datafile[i].sessionId == sessionId) {
           state.datafile[i].requests.push(newRequest)
@@ -122,10 +137,6 @@ const dataSlice = createSlice({
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
 
-    // For presentation purpose only (delete after presentation 01/25/2024, also setDemoData on 55)
-    setDemoData: (state, action) => {
-      state.demo = action.payload
-    }
   },
   // Reducers for asyncthunk
   extraReducers: (builder) => {
@@ -140,7 +151,6 @@ export const {
   setRunTabData,
   currentSessionConfig,
   createSession,
-  setDemoData,
   addRequest,
   duplicateSession,
   deleteSession,

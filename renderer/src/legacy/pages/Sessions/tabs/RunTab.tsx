@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import store from '../../../redux/store'
 import { useDispatch, useSelector } from 'react-redux'
-import { setDemoData, setRunTabData, runTest } from '../../../redux/dataSlice'
+import { setRunTabData, runTest } from '../../../redux/dataSlice'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Box, TextField, Button, Stack, Select, MenuItem, InputLabel, FormControl, OutlinedInput } from '@mui/material'
 
