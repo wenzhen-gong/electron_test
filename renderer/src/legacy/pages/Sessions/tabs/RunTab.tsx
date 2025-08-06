@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import store from '../../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setValidUserInput, setRunTabData, runTest } from '../../../redux/dataSlice';
+import {
+  setValidUserInput,
+  setRunTabData,
+  runTest,
+  resetRunTabConfig
+} from '../../../redux/dataSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -25,6 +30,21 @@ const RunTab = () => {
   const runTabConfig = useSelector((state) => state.runTabConfig);
   const validUserInput = useSelector((state) => state.validUserInput);
 
+  useEffect(() => {
+    return () => {
+      console.log('Resetting runTabConfig and validUserInput');
+      store.dispatch(resetRunTabConfig());
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('Checking if user input is valid');
+    if (validUserInput.valid) {
+      store.dispatch(runTest());
+    }
+  }, [validUserInput.valid]);
+
+  console.log('upon rendering, validUserInput & runTabConfig is: ', validUserInput, runTabConfig);
   // local states to manage input values, would be redundant to manage centrally...
   const [httpMethod, setHttpMethod] = useState('');
   const [URL, setURL] = useState('');
@@ -165,9 +185,7 @@ const RunTab = () => {
           color="primary"
           onClick={() => {
             validateUserInput();
-            if (validUserInput.valid) {
-              dispatch(runTest());
-            }
+            console.log('after clicking: ', validUserInput.valid);
           }}
         >
           Run

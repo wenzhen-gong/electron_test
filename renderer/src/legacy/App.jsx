@@ -31,12 +31,12 @@ const OutletContainer = styled.div`
 
 const App = (props) => {
   // Find the first session in data file, so we can redirect the initial page to the first session.
-  const firstSessionId = useSelector((state) => {
-    if (state.datafile.length > 0) {
-      return state.datafile[0].sessionId;
-    }
-    return null;
-  });
+  // const firstSessionId = useSelector((state) => {
+  //   if (state.datafile.length > 0) {
+  //     return state.datafile[0].sessionId;
+  //   }
+  //   return null;
+  // });
 
   // The overall page layout.
   const Layout = (props) => {
@@ -62,7 +62,7 @@ const App = (props) => {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate replace to={'/sessions/' + firstSessionId} />} />
+          <Route path="/" element={<Navigate replace to={'/sessions/'} />} />
 
           <Route path="/sessions" element={<Layout page="sessions" />}>
             <Route path="" element={<Sessions />} />

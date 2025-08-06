@@ -4,7 +4,7 @@ import { flushSync } from 'react-dom';
 const initialState = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {},
-  validUserInput: { valid: null, error: null }
+  validUserInput: { valid: false, error: null }
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
@@ -25,6 +25,7 @@ const dataSlice = createSlice({
     setRunTabData: (state, action) => {
       state.runTabConfig = action.payload;
     },
+    resetRunTabConfig: () => initialState,
     setValidUserInput: (state, action) => {
       state.validUserInput = action.payload;
     },
@@ -141,6 +142,7 @@ const dataSlice = createSlice({
 export const {
   setData,
   setRunTabData,
+  resetRunTabConfig,
   setValidUserInput,
   currentSessionConfig,
   createSession,
