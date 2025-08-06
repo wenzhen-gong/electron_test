@@ -1,10 +1,12 @@
 import React from "react";
+import { SyntheticEvent } from 'react';
 import styled from "styled-components";
 import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import type { RootState } from "../redux/store.js";
 
 const HeadBarContainer = styled.div`
     background-color: #1E1E1E;
@@ -45,12 +47,12 @@ const HeadBar = () => {
     const navigate = useNavigate();
 
     // Get all sessions from data file.
-    const allSessions = useSelector(state => state.datafile);
+    const allSessions = useSelector((state: RootState) => state.datafile);
 
     // Prepare all search values for the autocomplete search bar.
-    const allValues = [];
+    const allValues: string[] = [];
     // For each value in "allValues", generate its corresponding redirect URL.
-    const allURLs = [];
+    const allURLs:string[] = [];
     for (let i = 0; i < allSessions.length; i++) {
         // The session itself.
         allValues.push(allSessions[i].sessionName);
@@ -63,7 +65,10 @@ const HeadBar = () => {
         }
     }
     
-    const handleSelect = (e, newValue) => {
+    const handleSelect = (
+        e: SyntheticEvent, 
+        newValue: string | null
+    ) => {
         console.log("Selection is: ", newValue);
         for (let i = 0; i < allValues.length; ++i) {
             if (allValues[i] === newValue) {
