@@ -42,7 +42,7 @@ const RunTab = () => {
     if (validUserInput.valid) {
       store.dispatch(runTest());
     }
-  }, [validUserInput.valid]);
+  }, [validUserInput.valid, validUserInput.flag]);
 
   // console.log('upon rendering, validUserInput & runTabConfig is: ', validUserInput, runTabConfig);
   // local states to manage input values, would be redundant to manage centrally...
@@ -80,6 +80,7 @@ const RunTab = () => {
       store.dispatch(
         setValidUserInput({
           valid: false,
+          flag: !validUserInput.flag,
           error: 'httpMethod must be one of GET, POST, PUT, DELETE'
         })
       );
@@ -91,7 +92,13 @@ const RunTab = () => {
       typeof runTabConfig.URL !== 'string' ||
       !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(runTabConfig.URL)
     ) {
-      store.dispatch(setValidUserInput({ valid: false, error: 'URL must be a valid string URL' }));
+      store.dispatch(
+        setValidUserInput({
+          valid: false,
+          flag: !validUserInput.flag,
+          error: 'URL must be a valid string URL'
+        })
+      );
       return;
     }
     // 校验必须为正整数的字段
@@ -99,14 +106,21 @@ const RunTab = () => {
     for (const field of positiveIntegerFields) {
       if (!Number.isInteger(runTabConfig[field]) || runTabConfig[field] <= 0) {
         store.dispatch(
-          setValidUserInput({ valid: false, error: `${field} must be a positive integer` })
+          setValidUserInput({
+            valid: false,
+            flag: !validUserInput.flag,
+            error: `${field} must be a positive integer`
+          })
         );
         return;
       }
     }
 
     // 如果所有检查通过
-    store.dispatch(setValidUserInput({ valid: true }));
+    store.dispatch(setValidUserInput({
+        valid: true,
+        flag: !validUserInput.flag
+    }));
     return;
   };
 

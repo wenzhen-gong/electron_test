@@ -4,7 +4,7 @@ import { flushSync } from 'react-dom';
 const initialState = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {},
-  validUserInput: { valid: false, error: null }
+  validUserInput: { valid: false, flag: false, error: null }
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
