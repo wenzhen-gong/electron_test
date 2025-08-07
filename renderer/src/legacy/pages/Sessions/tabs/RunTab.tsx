@@ -1,37 +1,109 @@
-import React, { useState } from 'react'
-import store from '../../../redux/store'
-import { useDispatch, useSelector } from 'react-redux'
-import { setDemoData, setRunTabData, runTest } from '../../../redux/dataSlice'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Box, TextField, Button, Stack, Select, MenuItem, InputLabel, FormControl, OutlinedInput } from '@mui/material'
+import React, { useState, useEffect } from 'react';
+import store from '../../../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setValidUserInput,
+  setRunTabData,
+  runTest,
+  resetRunTabConfig
+} from '../../../redux/dataSlice';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  TextField,
+  Button,
+  Stack,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  OutlinedInput,
+  Typography
+} from '@mui/material';
 
 const RunTab = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const params = useParams()
-  const sessionId = params.id
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const params = useParams();
+  const sessionId = params.id;
 
-  const runTabConfig = useSelector((state) => state.runTabConfig)
+  const runTabConfig = useSelector((state) => state.runTabConfig);
+  const validUserInput = useSelector((state) => state.validUserInput);
 
+  useEffect(() => {
+    return () => {
+      console.log('Resetting runTabConfig and validUserInput');
+      store.dispatch(resetRunTabConfig());
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('Checking if user input is valid');
+    if (validUserInput.valid) {
+      store.dispatch(runTest());
+    }
+  }, [validUserInput.valid]);
+
+  console.log('upon rendering, validUserInput & runTabConfig is: ', validUserInput, runTabConfig);
   // local states to manage input values, would be redundant to manage centrally...
-  const [httpMethod, setHttpMethod] = useState('')
-  const [URL, setURL] = useState('')
-  const [testDuration, setTestDuration] = useState(0)
-  const [concurrencyNumber, setConcurrencyNumber] = useState(0)
-  const [totalRequests, setTotalRequests] = useState(0)
+  const [httpMethod, setHttpMethod] = useState('');
+  const [URL, setURL] = useState('');
+  const [testDuration, setTestDuration] = useState(0);
+  const [concurrencyNumber, setConcurrencyNumber] = useState(0);
+  const [totalRequests, setTotalRequests] = useState(0);
 
   // use setRunTabData reducer to manage runTabConfig state centrally
   const handleInputChange = (inputName, inputValue) => {
-    const config = { ...runTabConfig }
+    const config = { ...runTabConfig };
     if (inputName === 'URL') {
-      config.URL = inputValue
+      config.URL = inputValue;
     } else if (inputName === 'httpMethod') {
-      config.httpMethod = inputValue
+      config.httpMethod = inputValue;
     } else {
-      config[inputName] = parseInt(inputValue)
+      config[inputName] = parseInt(inputValue);
     }
-    store.dispatch(setRunTabData(config))
-  }
+    store.dispatch(setRunTabData(config));
+  };
+
+  const validateUserInput = () => {
+    // 校验 httpMethod
+    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+    if (
+      typeof runTabConfig.httpMethod !== 'string' ||
+      !allowedMethods.includes(runTabConfig.httpMethod.toUpperCase())
+    ) {
+      store.dispatch(
+        setValidUserInput({
+          valid: false,
+          error: 'httpMethod must be one of GET, POST, PUT, DELETE'
+        })
+      );
+      return;
+    }
+
+    // 校验 URL
+    if (
+      typeof runTabConfig.URL !== 'string' ||
+      !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(runTabConfig.URL)
+    ) {
+      store.dispatch(setValidUserInput({ valid: false, error: 'URL must be a valid string URL' }));
+      return;
+    }
+    // 校验必须为正整数的字段
+    const positiveIntegerFields = ['testDuration', 'concurrencyNumber', 'totalRequests'];
+    for (const field of positiveIntegerFields) {
+      if (!Number.isInteger(runTabConfig[field]) || runTabConfig[field] <= 0) {
+        store.dispatch(
+          setValidUserInput({ valid: false, error: `${field} must be a positive integer` })
+        );
+        return;
+      }
+    }
+
+    // 如果所有检查通过
+    store.dispatch(setValidUserInput({ valid: true }));
+    return;
+  };
 
   return (
     <Box
@@ -51,10 +123,9 @@ const RunTab = () => {
           value={httpMethod}
           onChange={(e) => {
             setHttpMethod(e.target.value);
-            handleInputChange("httpMethod", e.target.value);
+            handleInputChange('httpMethod', e.target.value);
           }}
           input={<OutlinedInput label="HTTP Method" />}
-
         >
           <MenuItem value="GET">GET</MenuItem>
           <MenuItem value="POST">POST</MenuItem>
@@ -67,8 +138,8 @@ const RunTab = () => {
         variant="outlined"
         value={URL}
         onChange={(e) => {
-          setURL(e.target.value)
-          handleInputChange('URL', e.target.value)
+          setURL(e.target.value);
+          handleInputChange('URL', e.target.value);
         }}
         fullWidth
       />
@@ -79,8 +150,8 @@ const RunTab = () => {
         variant="outlined"
         value={testDuration}
         onChange={(e) => {
-          setTestDuration(e.target.value)
-          handleInputChange('testDuration', e.target.value)
+          setTestDuration(e.target.value);
+          handleInputChange('testDuration', e.target.value);
         }}
         fullWidth
       />
@@ -91,8 +162,8 @@ const RunTab = () => {
         variant="outlined"
         value={concurrencyNumber}
         onChange={(e) => {
-          setConcurrencyNumber(e.target.value)
-          handleInputChange('concurrencyNumber', e.target.value)
+          setConcurrencyNumber(e.target.value);
+          handleInputChange('concurrencyNumber', e.target.value);
         }}
         fullWidth
       />
@@ -103,27 +174,39 @@ const RunTab = () => {
         variant="outlined"
         value={totalRequests}
         onChange={(e) => {
-          setTotalRequests(e.target.value)
-          handleInputChange('totalRequests', e.target.value)
+          setTotalRequests(e.target.value);
+          handleInputChange('totalRequests', e.target.value);
         }}
         fullWidth
       />
       <Stack direction="row" spacing={2} sx={{ marginTop: 2 }} justifyContent="flex-start">
-        <Button variant="contained" color="primary" onClick={() => dispatch(runTest())}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            validateUserInput();
+            console.log('after clicking: ', validUserInput.valid);
+          }}
+        >
           Run
         </Button>
         <Button
           variant="outlined"
           color="secondary"
           onClick={() => {
-            navigate('/result/' + sessionId + '/' + 1660926192826)
+            navigate('/result/' + sessionId + '/' + 1660926192826);
           }}
         >
           Result
         </Button>
       </Stack>
+      {validUserInput.error && (
+        <Typography variant="body2" sx={{ color: 'error.main', marginTop: 1, marginLeft: '20px' }}>
+          {validUserInput.error}
+        </Typography>
+      )}
     </Box>
-  )
-}
+  );
+};
 
-export default RunTab
+export default RunTab;
