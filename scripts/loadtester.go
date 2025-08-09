@@ -18,7 +18,7 @@ type Config struct {
 	Count       int               `json:"totalRequests"`
 	Method      string            `json:"httpMethod"`
 	Payload     string            `json:"reqBody"`
-	Headers     map[string]string `json:"headers"`
+	Headers     map[string]string `json:"finalHeaders"`
 }
 
 type Result struct {

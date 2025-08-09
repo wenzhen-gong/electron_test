@@ -6,7 +6,8 @@ import {
   setRunTabData,
   setHeaders,
   runTest,
-  resetRunTabConfig
+  resetRunTabConfig,
+  setContentType
 } from '../../../redux/dataSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -24,7 +25,6 @@ import {
 } from '@mui/material';
 
 const RunTab = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const params = useParams();
   const sessionId = params.id;
@@ -32,6 +32,7 @@ const RunTab = () => {
   const runTabConfig = useSelector((state) => state.runTabConfig);
   const validUserInput = useSelector((state) => state.validUserInput);
   const headers = useSelector((state) => state.headers);
+  const contentType = useSelector((state) => state.contentType)
   useEffect(() => {
     return () => {
       // console.log('Resetting runTabConfig and validUserInput');
@@ -47,7 +48,7 @@ const RunTab = () => {
   }, [validUserInput.valid, validUserInput.flag]);
 
   // const [headers, setHeaders] = useState([]);
-  const [contentType, setContentType] = useState('');
+  // const [contentType, setContentType] = useState('');
   // console.log('upon rendering, headers is: ', headers, headers.length);
 
   // use setRunTabData reducer to manage runTabConfig state centrally
@@ -56,8 +57,8 @@ const RunTab = () => {
     if (
       inputName === 'URL' ||
       inputName === 'httpMethod' ||
-      inputName === 'reqBody' ||
-      inputName === 'contentType'
+      inputName === 'reqBody'
+      // inputName === 'contentType'
     ) {
       config[inputName] = inputValue;
     } else {
@@ -67,13 +68,8 @@ const RunTab = () => {
   };
 
   const handleHeaderChange = (e, field, index) => {
-    // console.log(index, e.target.value)
-    // const index = parseInt(e.target.dataset.index, 10);
-    // const newValue = e.target.value;
-
     const updated = [...headers];
     updated[index] = { ...updated[index], [field]: e.target.value };
-
     store.dispatch(setHeaders(updated));
   };
 
@@ -175,7 +171,6 @@ const RunTab = () => {
           variant="outlined"
           // value={URL}
           onChange={(e) => {
-            // setURL(e.target.value);
             handleInputChange('URL', e.target.value);
           }}
           fullWidth
@@ -199,7 +194,6 @@ const RunTab = () => {
           variant="outlined"
           // value={concurrencyNumber}
           onChange={(e) => {
-            // setConcurrencyNumber(e.target.value);
             handleInputChange('concurrencyNumber', e.target.value);
           }}
           fullWidth
@@ -211,7 +205,6 @@ const RunTab = () => {
           variant="outlined"
           // value={totalRequests}
           onChange={(e) => {
-            // setTotalRequests(e.target.value);
             handleInputChange('totalRequests', e.target.value);
           }}
           fullWidth
@@ -331,8 +324,12 @@ const RunTab = () => {
             labelId="method-label"
             value={contentType}
             onChange={(e) => {
-              setContentType(e.target.value);
-              handleInputChange('contentType', e.target.value);
+              if(e.target.value === 'JSON'){
+                store.dispatch(setContentType('application/json'));
+              }else{
+                store.dispatch(setContentType('text/plain'));
+
+              }
             }}
             input={<OutlinedInput label="Content Type" />}
           >
