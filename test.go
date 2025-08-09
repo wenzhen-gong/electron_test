@@ -46,13 +46,13 @@ func main() {
 			body := strings.NewReader("{\"name\":\"test\"}")
 			// body := strings.NewReader("a string")
 
-			// headers := map[string]string{"Content-Type": "application/json"}
+			headers := map[string]string{"Content-Type": "application/json"}
 
 			req, _ := http.NewRequest("POST", "https://httpbin.org/post", body)
 
-			// for k, v := range headers {
-			// 	req.Header.Set(k, v)
-			// }
+			for k, v := range headers {
+				req.Header.Set(k, v)
+			}
 
 			start := time.Now()
 			resp, err := http.DefaultClient.Do(req)

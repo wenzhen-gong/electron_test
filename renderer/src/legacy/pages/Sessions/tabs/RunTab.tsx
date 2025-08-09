@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   setValidUserInput,
   setRunTabData,
+  setHeaders,
   runTest,
   resetRunTabConfig
 } from '../../../redux/dataSlice';
@@ -18,7 +19,8 @@ import {
   InputLabel,
   FormControl,
   OutlinedInput,
-  Typography
+  Typography,
+  Grid
 } from '@mui/material';
 
 const RunTab = () => {
@@ -29,7 +31,7 @@ const RunTab = () => {
 
   const runTabConfig = useSelector((state) => state.runTabConfig);
   const validUserInput = useSelector((state) => state.validUserInput);
-
+  const headers = useSelector((state) => state.headers);
   useEffect(() => {
     return () => {
       // console.log('Resetting runTabConfig and validUserInput');
@@ -44,15 +46,9 @@ const RunTab = () => {
     }
   }, [validUserInput.valid, validUserInput.flag]);
 
-  // console.log('upon rendering, validUserInput & runTabConfig is: ', validUserInput, runTabConfig);
-  // local states to manage input values, would be redundant to manage centrally...
-  const [httpMethod, setHttpMethod] = useState('');
-  const [URL, setURL] = useState('');
-  const [testDuration, setTestDuration] = useState(0);
-  const [concurrencyNumber, setConcurrencyNumber] = useState(0);
-  const [totalRequests, setTotalRequests] = useState(0);
-  const [reqBody, setReqBody] = useState('');
+  // const [headers, setHeaders] = useState([]);
   const [contentType, setContentType] = useState('');
+  // console.log('upon rendering, headers is: ', headers, headers.length);
 
   // use setRunTabData reducer to manage runTabConfig state centrally
   const handleInputChange = (inputName, inputValue) => {
@@ -65,9 +61,28 @@ const RunTab = () => {
     ) {
       config[inputName] = inputValue;
     } else {
-      config[inputName] = parseInt(inputValue);
+      config[inputName] = Number(inputValue);
     }
     store.dispatch(setRunTabData(config));
+  };
+
+  const handleHeaderChange = (e, field, index) => {
+    // console.log(index, e.target.value)
+    // const index = parseInt(e.target.dataset.index, 10);
+    // const newValue = e.target.value;
+
+    const updated = [...headers];
+    updated[index] = { ...updated[index], [field]: e.target.value };
+
+    store.dispatch(setHeaders(updated));
+  };
+
+  const handleAddHeader = () => {
+    store.dispatch(setHeaders([...headers, {}]));
+  };
+  const handleRemoveHeader = (index) => {
+    console.log('removing index: ', index);
+    store.dispatch(setHeaders(headers.filter((_, i) => i !== index)));
   };
 
   const validateUserInput = () => {
@@ -117,10 +132,12 @@ const RunTab = () => {
     }
 
     // 如果所有检查通过
-    store.dispatch(setValidUserInput({
+    store.dispatch(
+      setValidUserInput({
         valid: true,
         flag: !validUserInput.flag
-    }));
+      })
+    );
     return;
   };
 
@@ -140,9 +157,9 @@ const RunTab = () => {
           <InputLabel id="method-label">HTTP Method</InputLabel>
           <Select
             labelId="method-label"
-            value={httpMethod}
+            // value={httpMethod}
             onChange={(e) => {
-              setHttpMethod(e.target.value);
+              // setHttpMethod(e.target.value);
               handleInputChange('httpMethod', e.target.value);
             }}
             input={<OutlinedInput label="HTTP Method" />}
@@ -156,9 +173,9 @@ const RunTab = () => {
         <TextField
           label="URL"
           variant="outlined"
-          value={URL}
+          // value={URL}
           onChange={(e) => {
-            setURL(e.target.value);
+            // setURL(e.target.value);
             handleInputChange('URL', e.target.value);
           }}
           fullWidth
@@ -168,9 +185,9 @@ const RunTab = () => {
           label="Test Duration"
           type="number"
           variant="outlined"
-          value={testDuration}
+          // value={testDuration}
           onChange={(e) => {
-            setTestDuration(e.target.value);
+            // setTestDuration(e.target.value);
             handleInputChange('testDuration', e.target.value);
           }}
           fullWidth
@@ -180,9 +197,9 @@ const RunTab = () => {
           label="Concurrency Number"
           type="number"
           variant="outlined"
-          value={concurrencyNumber}
+          // value={concurrencyNumber}
           onChange={(e) => {
-            setConcurrencyNumber(e.target.value);
+            // setConcurrencyNumber(e.target.value);
             handleInputChange('concurrencyNumber', e.target.value);
           }}
           fullWidth
@@ -192,9 +209,9 @@ const RunTab = () => {
           label="Total Requests"
           type="number"
           variant="outlined"
-          value={totalRequests}
+          // value={totalRequests}
           onChange={(e) => {
-            setTotalRequests(e.target.value);
+            // setTotalRequests(e.target.value);
             handleInputChange('totalRequests', e.target.value);
           }}
           fullWidth
@@ -242,13 +259,61 @@ const RunTab = () => {
         <TextField
           label="Request Body"
           variant="outlined"
-          value={reqBody}
+          // value={reqBody}
           onChange={(e) => {
-            setReqBody(e.target.value);
+            // setReqBody(e.target.value);
             handleInputChange('reqBody', e.target.value);
           }}
           fullWidth
         />
+        <Typography variant="h6" sx={{ marginTop: 2 }}>
+          Headers
+        </Typography>
+        {headers.map((header, index) => (
+          <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
+            <Grid item xs={6}>
+              <TextField
+                label="Key"
+                variant="outlined"
+                fullWidth
+                value={header.key}
+                // data-index={index}
+                onChange={(e) => handleHeaderChange(e, 'key', index)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Value"
+                variant="outlined"
+                fullWidth
+                value={header.value}
+                // data-index={index}
+                onChange={(e) => handleHeaderChange(e, 'value', index)}
+              />
+            </Grid>
+            <Button variant="outlined" onClick={() => handleRemoveHeader(index)}>
+              - Remove Header
+            </Button>
+          </Grid>
+        ))}
+        <Button variant="outlined" onClick={handleAddHeader}>
+          + Add Header
+        </Button>
+
+        {/* <Box display="flex" gap={1}>
+          <TextField
+            label="Key"
+            variant="outlined"
+            fullWidth
+            onChange={(e) => handleInputChange('headerKey', e.target.value)}
+          />
+          <TextField
+            label="Value"
+            variant="outlined"
+            fullWidth
+            onChange={(e) => handleInputChange('headerValue', e.target.value)}
+          />
+        </Box> */}
       </Box>
       <Box
         component="form"

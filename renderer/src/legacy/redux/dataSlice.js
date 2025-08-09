@@ -4,6 +4,7 @@ import { flushSync } from 'react-dom';
 const initialState = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {},
+  headers: [],
   validUserInput: { valid: false, flag: false, error: null }
 };
 
@@ -26,6 +27,9 @@ const dataSlice = createSlice({
       state.runTabConfig = action.payload;
     },
     resetRunTabConfig: () => initialState,
+    setHeaders: (state, action) => {
+      state.headers = action.payload;
+    },
     setValidUserInput: (state, action) => {
       state.validUserInput = action.payload;
     },
@@ -143,6 +147,7 @@ export const {
   setData,
   setRunTabData,
   resetRunTabConfig,
+  setHeaders,
   setValidUserInput,
   currentSessionConfig,
   createSession,
