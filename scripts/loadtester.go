@@ -4,8 +4,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -15,8 +17,8 @@ type Config struct {
 	Concurrency int               `json:"concurrencyNumber"`
 	Count       int               `json:"totalRequests"`
 	Method      string            `json:"httpMethod"`
-	Payload     string            `json:"payload"`
-	Headers     map[string]string `json:"headers"`
+	Payload     string            `json:"reqBody"`
+	Headers     map[string]string `json:"finalHeaders"`
 }
 
 type Result struct {
@@ -48,8 +50,9 @@ func main() {
 		go func(index int) {
 			defer func() { <-sem }()
 			defer wg.Done()
+			body := strings.NewReader(config.Payload)
 
-			req, _ := http.NewRequest(config.Method, config.URL, nil)
+			req, _ := http.NewRequest(config.Method, config.URL, body)
 			for k, v := range config.Headers {
 				req.Header.Set(k, v)
 			}
@@ -61,6 +64,10 @@ func main() {
 			mu.Lock()
 			times[index] = duration
 			if err == nil && resp.StatusCode < 400 {
+				defer resp.Body.Close()
+				bodyBytes, _ := io.ReadAll(resp.Body)
+				bodyStr := string(bodyBytes)
+				fmt.Fprintln(os.Stderr, bodyStr)
 				success++
 			} else {
 				failures++
