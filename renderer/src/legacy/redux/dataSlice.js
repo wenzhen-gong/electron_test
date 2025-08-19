@@ -5,6 +5,7 @@ const initialState = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {},
   headers: [],
+  params: [],
   contentType: null,
   validUserInput: { valid: false, flag: false, error: null }
 };
@@ -14,6 +15,10 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
   // console.log('config in runTest Thunk: ', state.runTabConfig);
   // console.log('contentType in runTest Thunk: ', state.contentType);
   // console.log('headers in runTest Thunk: ', state.headers);
+  // console.log('params in runTest Thunk: ', state.params);
+  let finalURL = state.runTabConfig.URL;
+  state.params.forEach((param) => (finalURL += '?' + param.key + '=' + param.value + '&'));
+
   let finalHeaders = {};
   if (state.contentType) {
     finalHeaders['Content-Type'] = state.contentType;
@@ -22,8 +27,9 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
     finalHeaders[header.key] = header.value;
   });
   // console.log('finalHeaders in runTest Thunk: ', finalHeaders);
-  let finalRunTabConfig = {...state.runTabConfig, finalHeaders}
-    console.log('finalRunTabConfig in runTest Thunk: ', finalRunTabConfig);
+  let finalRunTabConfig = { ...state.runTabConfig, finalHeaders };
+  finalRunTabConfig.URL = finalURL;
+  console.log('finalRunTabConfig in runTest Thunk: ', finalRunTabConfig);
 
   const result = await window.api.runLoadTest(finalRunTabConfig);
   return result;
@@ -46,6 +52,9 @@ const dataSlice = createSlice({
     },
     setHeaders: (state, action) => {
       state.headers = action.payload;
+    },
+    setParams: (state, action) => {
+      state.params = action.payload;
     },
     setValidUserInput: (state, action) => {
       state.validUserInput = action.payload;
@@ -166,6 +175,7 @@ export const {
   resetRunTabConfig,
   setContentType,
   setHeaders,
+  setParams,
   setValidUserInput,
   currentSessionConfig,
   createSession,
