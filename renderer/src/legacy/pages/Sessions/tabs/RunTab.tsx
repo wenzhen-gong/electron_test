@@ -5,6 +5,7 @@ import {
   setValidUserInput,
   setRunTabData,
   setHeaders,
+  setParams,
   runTest,
   resetRunTabConfig,
   setContentType
@@ -26,13 +27,15 @@ import {
 
 const RunTab = () => {
   const navigate = useNavigate();
-  const params = useParams();
-  const sessionId = params.id;
+  // const params = useParams();
+  // const sessionId = params.id;
 
   const runTabConfig = useSelector((state) => state.runTabConfig);
   const validUserInput = useSelector((state) => state.validUserInput);
   const headers = useSelector((state) => state.headers);
-  const contentType = useSelector((state) => state.contentType)
+  const params = useSelector((state) => state.params);
+
+  // const contentType = useSelector((state) => state.contentType);
   useEffect(() => {
     return () => {
       // console.log('Resetting runTabConfig and validUserInput');
@@ -47,8 +50,6 @@ const RunTab = () => {
     }
   }, [validUserInput.valid, validUserInput.flag]);
 
-  // const [headers, setHeaders] = useState([]);
-  // const [contentType, setContentType] = useState('');
   // console.log('upon rendering, headers is: ', headers, headers.length);
 
   // use setRunTabData reducer to manage runTabConfig state centrally
@@ -72,13 +73,24 @@ const RunTab = () => {
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setHeaders(updated));
   };
-
   const handleAddHeader = () => {
     store.dispatch(setHeaders([...headers, {}]));
   };
   const handleRemoveHeader = (index) => {
     console.log('removing index: ', index);
     store.dispatch(setHeaders(headers.filter((_, i) => i !== index)));
+  };
+  const handleParamChange = (e, field, index) => {
+    const updated = [...params];
+    updated[index] = { ...updated[index], [field]: e.target.value };
+    store.dispatch(setParams(updated));
+  };
+  const handleAddParam = () => {
+    store.dispatch(setParams([...params, {}]));
+  };
+  const handleRemoveParam = (index) => {
+    console.log('removing index: ', index);
+    store.dispatch(setParams(params.filter((_, i) => i !== index)));
   };
 
   const validateUserInput = () => {
@@ -220,7 +232,7 @@ const RunTab = () => {
           >
             Run
           </Button>
-          <Button
+          {/* <Button
             variant="outlined"
             color="secondary"
             onClick={() => {
@@ -228,7 +240,7 @@ const RunTab = () => {
             }}
           >
             Result
-          </Button>
+          </Button> */}
         </Stack>
         {validUserInput.error && (
           <Typography
@@ -293,20 +305,39 @@ const RunTab = () => {
           + Add Header
         </Button>
 
-        {/* <Box display="flex" gap={1}>
-          <TextField
-            label="Key"
-            variant="outlined"
-            fullWidth
-            onChange={(e) => handleInputChange('headerKey', e.target.value)}
-          />
-          <TextField
-            label="Value"
-            variant="outlined"
-            fullWidth
-            onChange={(e) => handleInputChange('headerValue', e.target.value)}
-          />
-        </Box> */}
+        <Typography variant="h6" sx={{ marginTop: 2 }}>
+          Parameters
+        </Typography>
+        {params.map((param, index) => (
+          <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
+            <Grid item xs={6}>
+              <TextField
+                label="Key"
+                variant="outlined"
+                fullWidth
+                value={param.key}
+                // data-index={index}
+                onChange={(e) => handleParamChange(e, 'key', index)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Value"
+                variant="outlined"
+                fullWidth
+                value={param.value}
+                // data-index={index}
+                onChange={(e) => handleParamChange(e, 'value', index)}
+              />
+            </Grid>
+            <Button variant="outlined" onClick={() => handleRemoveParam(index)}>
+              - Remove A Param
+            </Button>
+          </Grid>
+        ))}
+        <Button variant="outlined" onClick={handleAddParam}>
+          + Add A Parameter
+        </Button>
       </Box>
       <Box
         component="form"
@@ -322,11 +353,11 @@ const RunTab = () => {
           <InputLabel id="method-label">Content Type</InputLabel>
           <Select
             labelId="method-label"
-            value={contentType}
+            // value={contentType}
             onChange={(e) => {
-              if(e.target.value === 'JSON'){
+              if (e.target.value === 'JSON') {
                 store.dispatch(setContentType('application/json'));
-              }else{
+              } else {
                 store.dispatch(setContentType('text/plain'));
 
               }
