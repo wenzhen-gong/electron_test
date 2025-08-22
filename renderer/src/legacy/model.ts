@@ -69,9 +69,40 @@ export interface Session {
     "history": History[]
 }
 
+// RunTab相关的类型定义
+export interface RunTabConfig {
+    URL?: string;
+    httpMethod?: string;
+    reqBody?: string;
+    testDuration?: number;
+    concurrencyNumber?: number;
+    totalRequests?: number;
+    [key: string]: string | number | undefined;
+}
+
+export interface Header {
+    key: string;
+    value: string;
+}
+
+export interface Param {
+    key: string;
+    value: string;
+}
+
+export interface ValidUserInput {
+    valid: boolean;
+    flag: boolean;
+    error: string | null;
+}
+
 export interface State {
     datafile: Session[],
     configFile?: Session,
-    runTabConfig: any
+    runTabConfig: RunTabConfig,
+    headers: Header[],
+    params: Param[],
+    contentType: string | null,
+    validUserInput: ValidUserInput
 }
 

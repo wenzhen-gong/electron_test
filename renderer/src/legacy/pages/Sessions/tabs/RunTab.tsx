@@ -25,32 +25,7 @@ import {
   Grid
 } from '@mui/material';
 import { RootState } from '../../../redux/store';
-
-interface Header {
-  key: string;
-  value: string;
-}
-
-interface Param {
-  key: string;
-  value: string;
-}
-
-interface RunTabConfig {
-  URL: string;
-  httpMethod: string;
-  reqBody: string;
-  testDuration: number;
-  concurrencyNumber: number;
-  totalRequests: number;
-  [key: string]: string | number;
-}
-
-interface ValidUserInput {
-  valid: boolean;
-  flag: boolean;
-  error?: string;
-}
+import { Header, Param, RunTabConfig, ValidUserInput } from '../../../model';
 
 const RunTab: React.FC = () => {
   const navigate = useNavigate();
