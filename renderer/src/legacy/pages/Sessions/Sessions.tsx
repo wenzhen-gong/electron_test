@@ -1,22 +1,29 @@
-import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
-import { useParams, useNavigate } from 'react-router-dom'
-import OverviewTab from './tabs/OverviewTab.jsx'
-import RunTab from './tabs/RunTab.jsx'
-import AuthorizationTab from './tabs/AuthorizationTab.jsx'
-import PreviousResultsTab from './tabs/PreviousResultsTab.jsx'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import PropTypes from 'prop-types'
-import Box from '@mui/material/Box'
-import { useSelector } from 'react-redux'
-import ListIcon from '@mui/icons-material/List'
-import Typography from '@mui/material/Typography'
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { useParams, useNavigate } from 'react-router-dom';
+import OverviewTab from './tabs/OverviewTab';
+import RunTab from './tabs/RunTab';
+import AuthorizationTab from './tabs/AuthorizationTab';
+import PreviousResultsTab from './tabs/PreviousResultsTab';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import PropTypes from 'prop-types';
+import Box from '@mui/material/Box';
+import { useSelector } from 'react-redux';
+import ListIcon from '@mui/icons-material/List';
+import Typography from '@mui/material/Typography';
+import { RootState } from '../../redux/store';
 
 // https://mui.com/material-ui/react-tabs/
 // Some helper functions to render tab bar & tab pannels.
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props
+interface CustomTabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: CustomTabPanelProps) {
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -28,52 +35,46 @@ function CustomTabPanel(props) {
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
-  )
+  );
 }
 
-CustomTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired
-}
-
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `session-tab-${index}`,
     'aria-controls': `session-tabpanel-${index}`
-  }
+  };
 }
 
 // Create styled components outside render functions to avoid recreating new components for each re-render.
 const SessionsDiv = styled.div`
   padding: 50px;
-`
+`;
 
-const Sessions = () => {
-  const configFile = useSelector((state) => state.configFile)
-  console.log('Current configFile on SessionTab:', configFile)
+const Sessions: React.FC = () => {
+  const configFile = useSelector((state: RootState) => state.configFile);
+  console.log('Current configFile on SessionTab:', configFile);
   // Get the session Id from URL parameters.
-  const params = useParams()
-  const sessionId = params.id
+  const params = useParams();
+  const sessionId = params.id;
 
   // Get the session name to display on the title bar.
-  const sessionName = useSelector((state) => {
+  const sessionName = useSelector((state: RootState) => {
     for (let i = 0; i < state.datafile.length; i++) {
-      if (state.datafile[i].sessionId == sessionId) {
-        return state.datafile[i].sessionName
+      if (state.datafile[i].sessionId.toString() === sessionId) {
+        return state.datafile[i].sessionName;
       }
     }
-    return null
-  })
+    return null;
+  });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Tab bar's state that represents the currently selected tab.
   // 0 = overview, 1 = authorization, 2 = run, 3 = previous results.
-  const [currentTab, setCurrentTab] = useState(0) // Overview
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue)
-  }
+  const [currentTab, setCurrentTab] = useState<number>(0); // Overview
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
+    setCurrentTab(newValue);
+  };
 
   // useEffect(() => {
   //     // Update the tab based on the selected session ID
@@ -101,8 +102,8 @@ const Sessions = () => {
           variant="h6"
           component="h6"
           onClick={() => {
-            setCurrentTab(0)
-            navigate('/sessions/' + sessionId)
+            setCurrentTab(0);
+            navigate('/sessions/' + sessionId);
           }}
           sx={{ cursor: 'pointer' }}
         >
@@ -132,12 +133,12 @@ const Sessions = () => {
         <CustomTabPanel value={currentTab} index={2}>
           <RunTab />
         </CustomTabPanel>
-        <CustomTabPanel value={currentTab} index={2}>
+        <CustomTabPanel value={currentTab} index={3}>
           <PreviousResultsTab />
         </CustomTabPanel>
       </Box>
     </SessionsDiv>
-  )
-}
+  );
+};
 
-export default Sessions
+export default Sessions;

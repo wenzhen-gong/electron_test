@@ -12,9 +12,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { setData } from './legacy/redux/dataSlice'
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const data = await window.api.readDataFile();
-  store.dispatch(setData(JSON.parse(data)));
+  store.dispatch(setData(JSON.parse(data as string)));
 
   const darkTheme = createTheme({
     palette: { mode: 'dark' }
