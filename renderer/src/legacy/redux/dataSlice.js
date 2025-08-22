@@ -55,6 +55,7 @@ const dataSlice = createSlice({
     },
     setParams: (state, action) => {
       state.params = action.payload;
+      console.log(state.params)
     },
     setValidUserInput: (state, action) => {
       state.validUserInput = action.payload;
