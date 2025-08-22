@@ -48,6 +48,7 @@ const App: React.FC = () => {
     //没有地址栏，但是可以用useLocation追踪当前url
     const location = useLocation();
     console.log('Current URL:', location.pathname);
+
     return (
       <PageContainer>
         <HeadBar />
@@ -67,7 +68,7 @@ const App: React.FC = () => {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate replace to={'/sessions/' + firstSessionId} />} />
+          <Route path="/" element={<Navigate replace to={'/sessions/'} />} />
 
           <Route path="/sessions" element={<Layout page="sessions" />}>
             <Route path="" element={<Sessions />} />

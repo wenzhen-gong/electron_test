@@ -44,8 +44,9 @@ func main() {
 			defer wg.Done()
 
 			body := strings.NewReader("{\"name\":\"test\"}")
+			// body := strings.NewReader("a string")
 
-			headers := map[string]string{"Content-Type": "application/json", "test-header": "Hello"}
+			headers := map[string]string{"Content-Type": "application/json"}
 
 			req, _ := http.NewRequest("POST", "https://httpbin.org/post", body)
 
