@@ -6,3 +6,5 @@ const store = configureStore({
 });
 
 export default store;
+// 导出 RootState 类型
+export type RootState = ReturnType<typeof store.getState>;
