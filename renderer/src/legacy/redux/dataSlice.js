@@ -16,8 +16,8 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
   // console.log('contentType in runTest Thunk: ', state.contentType);
   // console.log('headers in runTest Thunk: ', state.headers);
   // console.log('params in runTest Thunk: ', state.params);
-  let finalURL = state.runTabConfig.URL;
-  state.params.forEach((param) => (finalURL += '?' + param.key + '=' + param.value + '&'));
+  // let finalURL = state.runTabConfig.URL;
+  // state.params.forEach((param) => (finalURL += '?' + param.key + '=' + param.value + '&'));
 
   let finalHeaders = {};
   if (state.contentType) {
@@ -28,7 +28,7 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
   });
   // console.log('finalHeaders in runTest Thunk: ', finalHeaders);
   let finalRunTabConfig = { ...state.runTabConfig, finalHeaders };
-  finalRunTabConfig.URL = finalURL;
+  // finalRunTabConfig.URL = finalURL;
   console.log('finalRunTabConfig in runTest Thunk: ', finalRunTabConfig);
 
   const result = await window.api.runLoadTest(finalRunTabConfig);

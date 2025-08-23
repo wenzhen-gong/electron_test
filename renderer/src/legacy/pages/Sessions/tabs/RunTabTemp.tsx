@@ -44,7 +44,7 @@ const RunTabTemp = () => {
 
   useEffect(() => {
     // console.log('Checking if user input is valid');
-    if (validUserInput.valid) {
+    if (true) {
       store.dispatch(runTest());
     }
   }, [validUserInput.valid, validUserInput.flag]);
@@ -87,17 +87,21 @@ const RunTabTemp = () => {
         param.value.indexOf('&') === -1
           ? param.value
           : param.value.slice(0, param.value.indexOf('&')) +
-            '%26' +
-            param.value.slice(param.value.indexOf('&') + 1, param.value.length);
+          '%26' +
+          param.value.slice(param.value.indexOf('&') + 1, param.value.length);
       suffix += param.key + '=' + value + '&';
     });
     let updatedURL = runTabConfig.URL;
+    console.log('updatedURL is: ', updatedURL)
     updatedURL =
       updatedURL.indexOf('?') === -1
         ? updatedURL + suffix.slice(0, suffix.length - 1)
         : updatedURL.slice(0, updatedURL.indexOf('?')) + suffix.slice(0, suffix.length - 1);
     const updatedRunTabConfig = { ...runTabConfig };
+    console.log('after modification, updatedURL is: ', updatedURL)
+
     updatedRunTabConfig['URL'] = updatedURL;
+    console.log(updatedRunTabConfig)
     store.dispatch(setRunTabData(updatedRunTabConfig));
   };
   const handleParamChange = (e, field, index) => {
@@ -192,6 +196,18 @@ const RunTabTemp = () => {
           }}
           fullWidth
         />
+        <Stack direction="row" spacing={2} sx={{ marginTop: 2 }} justifyContent="flex-start">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              validateUserInput();
+              console.log('after clicking: ', validUserInput.valid);
+            }}
+          >
+            Run
+          </Button>
+        </Stack>
       </Box>
       <Box
         component="form"
