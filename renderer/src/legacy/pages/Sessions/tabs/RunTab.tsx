@@ -55,13 +55,27 @@ const RunTab = () => {
   // use setRunTabData reducer to manage runTabConfig state centrally
   const handleInputChange = (inputName, inputValue) => {
     const config = { ...runTabConfig };
-    if (
-      inputName === 'URL' ||
-      inputName === 'httpMethod' ||
-      inputName === 'reqBody'
-      // inputName === 'contentType'
-    ) {
+    if (inputName === 'httpMethod' || inputName === 'reqBody') {
       config[inputName] = inputValue;
+    } else if (inputName === 'URL') {
+      config[inputName] = inputValue;
+      if (inputValue.indexOf('?') !== -1) {
+        const paramsList = inputValue.substring(inputValue.indexOf('?') + 1).split('&');
+        const stateParam = [];
+        paramsList.forEach((param) => {
+          if (param.indexOf('=') !== -1) {
+            stateParam.push({
+              key: param.substring(0, param.indexOf('=')),
+              value: param.substring(param.indexOf('=') + 1)
+            });
+          } else {
+            stateParam.push({ key: param, value: '' });
+          }
+        });
+        store.dispatch(setParams(stateParam));
+      } else {
+        store.dispatch(setParams([]));
+      }
     } else {
       config[inputName] = Number(inputValue);
     }
@@ -80,17 +94,39 @@ const RunTab = () => {
     console.log('removing index: ', index);
     store.dispatch(setHeaders(headers.filter((_, i) => i !== index)));
   };
+  const updatedURL = (updated) => {
+    let suffix = '?';
+    updated.forEach((param) => {
+      const value =
+        param.value.indexOf('&') === -1
+          ? param.value
+          : param.value.slice(0, param.value.indexOf('&')) +
+          '%26' +
+          param.value.slice(param.value.indexOf('&') + 1, param.value.length);
+      suffix += param.key + '=' + value + '&';
+    });
+    let updatedURL = runTabConfig.URL;
+    updatedURL =
+      updatedURL.indexOf('?') === -1
+        ? updatedURL + suffix.slice(0, suffix.length - 1)
+        : updatedURL.slice(0, updatedURL.indexOf('?')) + suffix.slice(0, suffix.length - 1);
+    const updatedRunTabConfig = { ...runTabConfig };
+    updatedRunTabConfig['URL'] = updatedURL;
+    store.dispatch(setRunTabData(updatedRunTabConfig));
+  };
   const handleParamChange = (e, field, index) => {
     const updated = [...params];
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setParams(updated));
+    updatedURL(updated);
   };
   const handleAddParam = () => {
-    store.dispatch(setParams([...params, {}]));
+    store.dispatch(setParams([...params, { key: '', value: '' }]));
   };
   const handleRemoveParam = (index) => {
-    console.log('removing index: ', index);
-    store.dispatch(setParams(params.filter((_, i) => i !== index)));
+    const updated = params.filter((_, i) => i !== index);
+    store.dispatch(setParams(updated));
+    updatedURL(updated);
   };
 
   const validateUserInput = () => {
@@ -181,7 +217,7 @@ const RunTab = () => {
         <TextField
           label="URL"
           variant="outlined"
-          // value={URL}
+          value={runTabConfig.URL}
           onChange={(e) => {
             handleInputChange('URL', e.target.value);
           }}
@@ -359,7 +395,6 @@ const RunTab = () => {
                 store.dispatch(setContentType('application/json'));
               } else {
                 store.dispatch(setContentType('text/plain'));
-
               }
             }}
             input={<OutlinedInput label="Content Type" />}

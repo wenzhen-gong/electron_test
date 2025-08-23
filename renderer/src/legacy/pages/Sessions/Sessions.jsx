@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { useParams, useNavigate } from 'react-router-dom'
 import OverviewTab from './tabs/OverviewTab.jsx'
-import RunTabTemp from './tabs/RunTabTemp.jsx'
+import RunTab from './tabs/RunTab.jsx'
+// import RunTabTemp from './tabs/RunTabTemp.jsx'
 import AuthorizationTab from './tabs/AuthorizationTab.jsx'
 import PreviousResultsTab from './tabs/PreviousResultsTab.jsx'
 import Tabs from '@mui/material/Tabs'
@@ -130,7 +131,7 @@ const Sessions = () => {
           <AuthorizationTab />
         </CustomTabPanel>
         <CustomTabPanel value={currentTab} index={2}>
-          <RunTabTemp />
+          <RunTab />
         </CustomTabPanel>
         <CustomTabPanel value={currentTab} index={2}>
           <PreviousResultsTab />
