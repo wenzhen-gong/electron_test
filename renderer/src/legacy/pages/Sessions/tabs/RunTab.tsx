@@ -24,16 +24,18 @@ import {
   Typography,
   Grid
 } from '@mui/material';
+import { RootState } from '../../../redux/store';
+import { Header, Param, RunTabConfig, ValidUserInput } from '../../../model';
 
-const RunTab = () => {
+const RunTab: React.FC = () => {
   const navigate = useNavigate();
   // const params = useParams();
   // const sessionId = params.id;
 
-  const runTabConfig = useSelector((state) => state.runTabConfig);
-  const validUserInput = useSelector((state) => state.validUserInput);
-  const headers = useSelector((state) => state.headers);
-  const params = useSelector((state) => state.params);
+  const runTabConfig = useSelector((state: RootState) => state.runTabConfig);
+  const validUserInput = useSelector((state: RootState) => state.validUserInput);
+  const headers = useSelector((state: RootState) => state.headers);
+  const params = useSelector((state: RootState) => state.params);
 
   // const contentType = useSelector((state) => state.contentType);
   useEffect(() => {
@@ -53,7 +55,7 @@ const RunTab = () => {
   // console.log('upon rendering, headers is: ', headers, headers.length);
 
   // use setRunTabData reducer to manage runTabConfig state centrally
-  const handleInputChange = (inputName, inputValue) => {
+  const handleInputChange = (inputName: string, inputValue: string | number): void => {
     const config = { ...runTabConfig };
     if (inputName === 'httpMethod' || inputName === 'reqBody') {
       config[inputName] = inputValue;
@@ -82,15 +84,17 @@ const RunTab = () => {
     store.dispatch(setRunTabData(config));
   };
 
-  const handleHeaderChange = (e, field, index) => {
+  const handleHeaderChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Header, index: number): void => {
     const updated = [...headers];
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setHeaders(updated));
   };
-  const handleAddHeader = () => {
-    store.dispatch(setHeaders([...headers, {}]));
+  
+  const handleAddHeader = (): void => {
+    store.dispatch(setHeaders([...headers, { key: '', value: '' }]));
   };
-  const handleRemoveHeader = (index) => {
+  
+  const handleRemoveHeader = (index: number): void => {
     console.log('removing index: ', index);
     store.dispatch(setHeaders(headers.filter((_, i) => i !== index)));
   };
@@ -114,22 +118,25 @@ const RunTab = () => {
     updatedRunTabConfig['URL'] = updatedURL;
     store.dispatch(setRunTabData(updatedRunTabConfig));
   };
-  const handleParamChange = (e, field, index) => {
+  
+  const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Param, index: number): void => {
     const updated = [...params];
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setParams(updated));
     updatedURL(updated);
   };
-  const handleAddParam = () => {
-    store.dispatch(setParams([...params, { key: '', value: '' }]));
+  
+  const handleAddParam = (): void => {
+    store.dispatch(setParams([...params, { key: '', value: ''  key: '', value: '' }]));
   };
-  const handleRemoveParam = (index) => {
+  
+  const handleRemoveParam = (index: number): void => {
     const updated = params.filter((_, i) => i !== index);
     store.dispatch(setParams(updated));
     updatedURL(updated);
   };
 
-  const validateUserInput = () => {
+  const validateUserInput = (): void => {
     // 校验 httpMethod
     const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
     if (

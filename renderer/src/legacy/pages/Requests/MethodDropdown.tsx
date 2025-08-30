@@ -1,10 +1,15 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
-const DropdownMenu = ({ options, onSelect }) => {
-  const [isOpen, setIsOpen] = useState(false);
+interface DropdownMenuProps {
+  options: string[];
+  onSelect: (option: string) => void;
+}
 
-  const handleOptionClick = (option) => {
+const DropdownMenu: React.FC<DropdownMenuProps> = ({ options, onSelect }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const handleOptionClick = (option: string): void => {
     onSelect(option);
     setIsOpen(false);
   };
@@ -30,11 +35,15 @@ const DropdownList = styled.ul`
   padding: 0;
   margin: 0;
   position: absolute;
-  background-color: #1E1E1E;
+  background-color: #1e1e1e;
   border-radius: 4px;
 `;
 
-const DropdownItem = styled.li`
+interface DropdownItemProps {
+  backgroundColor?: string;
+}
+
+const DropdownItem = styled.li<DropdownItemProps>`
   padding: 8px;
   cursor: pointer;
 
@@ -44,16 +53,16 @@ const DropdownItem = styled.li`
   ${({ backgroundColor }) => backgroundColor && `background-color: ${backgroundColor};`}
 `;
 
-const getBackgroundColor = (method) => {
-    const methodColors = {
-      GET: "rgb(108, 221, 153)",
-      POST: "yellow",
-      PUT: "blue",
-      PATCH: "purple",
-      DELETE: "red",
-    };
-  
-    return methodColors[method] || "";
+const getBackgroundColor = (method: string): string => {
+  const methodColors: Record<string, string> = {
+    GET: 'rgb(108, 221, 153)',
+    POST: 'yellow',
+    PUT: 'blue',
+    PATCH: 'purple',
+    DELETE: 'red'
   };
-  
+
+  return methodColors[method] || '';
+};
+
 export default DropdownMenu;

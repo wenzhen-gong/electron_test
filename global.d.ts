@@ -6,7 +6,9 @@ declare global {
     api: {
       runLoadTest: (config: any) => Promise<any>
       readDataFile: () => unknown
-      writeDataFile: () => unknown
+      writeDataFile: (data:string) => unknown
     }
   }
 }
+
+
