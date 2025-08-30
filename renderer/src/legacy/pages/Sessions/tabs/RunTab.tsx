@@ -127,7 +127,7 @@ const RunTab: React.FC = () => {
   };
   
   const handleAddParam = (): void => {
-    store.dispatch(setParams([...params, { key: '', value: ''  key: '', value: '' }]));
+    store.dispatch(setParams([...params, { key: '', value: '' }]));
   };
   
   const handleRemoveParam = (index: number): void => {
