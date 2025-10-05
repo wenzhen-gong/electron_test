@@ -89,11 +89,11 @@ const RunTab: React.FC = () => {
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setHeaders(updated));
   };
-  
+
   const handleAddHeader = (): void => {
     store.dispatch(setHeaders([...headers, { key: '', value: '' }]));
   };
-  
+
   const handleRemoveHeader = (index: number): void => {
     console.log('removing index: ', index);
     store.dispatch(setHeaders(headers.filter((_, i) => i !== index)));
@@ -118,18 +118,18 @@ const RunTab: React.FC = () => {
     updatedRunTabConfig['URL'] = updatedURL;
     store.dispatch(setRunTabData(updatedRunTabConfig));
   };
-  
+
   const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Param, index: number): void => {
     const updated = [...params];
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setParams(updated));
     updatedURL(updated);
   };
-  
+
   const handleAddParam = (): void => {
     store.dispatch(setParams([...params, { key: '', value: '' }]));
   };
-  
+
   const handleRemoveParam = (index: number): void => {
     const updated = params.filter((_, i) => i !== index);
     store.dispatch(setParams(updated));
@@ -317,33 +317,41 @@ const RunTab: React.FC = () => {
         <Typography variant="h6" sx={{ marginTop: 2 }}>
           Headers
         </Typography>
-        {headers.map((header, index) => (
-          <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
-            <Grid item xs={6}>
-              <TextField
-                label="Key"
-                variant="outlined"
-                fullWidth
-                value={header.key}
-                // data-index={index}
-                onChange={(e) => handleHeaderChange(e, 'key', index)}
-              />
+        <Box
+          sx={{
+            maxHeight: 200,         // 限制最大高度
+            overflowY: "auto",      // 超过时出现垂直滚动条
+            pr: 1,                  // 给滚动条留点内边距，不会挡住输入框
+          }}
+        >
+          {headers.map((header, index) => (
+            <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
+              <Grid item xs={6}>
+                <TextField
+                  label="Key"
+                  variant="outlined"
+                  fullWidth
+                  value={header.key}
+                  // data-index={index}
+                  onChange={(e) => handleHeaderChange(e, 'key', index)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Value"
+                  variant="outlined"
+                  fullWidth
+                  value={header.value}
+                  // data-index={index}
+                  onChange={(e) => handleHeaderChange(e, 'value', index)}
+                />
+              </Grid>
+              <Button variant="outlined" onClick={() => handleRemoveHeader(index)}>
+                - Remove Header
+              </Button>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                label="Value"
-                variant="outlined"
-                fullWidth
-                value={header.value}
-                // data-index={index}
-                onChange={(e) => handleHeaderChange(e, 'value', index)}
-              />
-            </Grid>
-            <Button variant="outlined" onClick={() => handleRemoveHeader(index)}>
-              - Remove Header
-            </Button>
-          </Grid>
-        ))}
+          ))}
+        </Box>
         <Button variant="outlined" onClick={handleAddHeader}>
           + Add Header
         </Button>
@@ -351,33 +359,42 @@ const RunTab: React.FC = () => {
         <Typography variant="h6" sx={{ marginTop: 2 }}>
           Parameters
         </Typography>
-        {params.map((param, index) => (
-          <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
-            <Grid item xs={6}>
-              <TextField
-                label="Key"
-                variant="outlined"
-                fullWidth
-                value={param.key}
-                // data-index={index}
-                onChange={(e) => handleParamChange(e, 'key', index)}
-              />
+        <Box
+          sx={{
+            maxHeight: 200,
+            overflowY: "auto",
+            pr: 1,
+          }}
+        >
+          {params.map((param, index) => (
+            <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
+              <Grid item xs={6}>
+                <TextField
+                  label="Key"
+                  variant="outlined"
+                  fullWidth
+                  value={param.key}
+                  // data-index={index}
+                  onChange={(e) => handleParamChange(e, 'key', index)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Value"
+                  variant="outlined"
+                  fullWidth
+                  value={param.value}
+                  // data-index={index}
+                  onChange={(e) => handleParamChange(e, 'value', index)}
+                />
+              </Grid>
+              <Button variant="outlined" onClick={() => handleRemoveParam(index)}>
+                - Remove A Param
+              </Button>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                label="Value"
-                variant="outlined"
-                fullWidth
-                value={param.value}
-                // data-index={index}
-                onChange={(e) => handleParamChange(e, 'value', index)}
-              />
-            </Grid>
-            <Button variant="outlined" onClick={() => handleRemoveParam(index)}>
-              - Remove A Param
-            </Button>
-          </Grid>
-        ))}
+          ))}
+        </Box>
+
         <Button variant="outlined" onClick={handleAddParam}>
           + Add A Parameter
         </Button>
@@ -411,7 +428,7 @@ const RunTab: React.FC = () => {
           </Select>
         </FormControl>
       </Box>
-    </Box>
+    </Box >
   );
 };
 
