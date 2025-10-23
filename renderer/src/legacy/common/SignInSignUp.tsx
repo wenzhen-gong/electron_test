@@ -9,9 +9,12 @@ const SignInSignUp: React.FC = () => {
       <Button
         variant="outlined"
         color="secondary"
-      // onClick={() => {
-      //   navigate('/result/' + sessionId + '/' + 1660926192826);
-      // }}
+        onClick={() => {
+          fetch('localhost:8080/users/')
+            .then(response => response.json()) // Parse the JSON response
+            .then(data => console.log(data))
+            .catch(error => console.error('Error fetching data:', error));;
+        }}
       >
         Sign In
       </Button>
