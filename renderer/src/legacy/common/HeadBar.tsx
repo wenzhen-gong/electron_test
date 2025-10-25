@@ -6,7 +6,8 @@ import { useSelector } from 'react-redux';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import type { RootState } from '../redux/store.js';
+import SignInSignUp from './SignInSignUp';
+import type { RootState } from '../redux/store';
 
 const HeadBarContainer = styled.div`
   background-color: #1e1e1e;
@@ -18,6 +19,8 @@ const HeadBarContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  align-items: center;
+  padding: 0 20px;
 `;
 
 const LogoDiv = styled.div`
@@ -40,6 +43,7 @@ const SearchDiv = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
   height: 40px;
 `;
 
@@ -92,8 +96,8 @@ const HeadBar = () => {
           renderInput={(params) => <TextField {...params} label="Search Kaskade" />}
           onChange={handleSelect}
         />
-        {/* <div><TextField id="outlined-basic" label="Search" variant="outlined" onChange={handleSearch}/></div> */}
       </SearchDiv>
+      <SignInSignUp />
     </HeadBarContainer>
   );
 };

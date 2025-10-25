@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"context"
-	"gin2025/config"
-	"gin2025/models"
+	"kaskade_backend/config"
+	"kaskade_backend/models"
 	"net/http"
 	"time"
 

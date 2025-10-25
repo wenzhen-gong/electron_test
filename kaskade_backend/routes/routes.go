@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"gin2025/controllers"
+	"kaskade_backend/controllers"
 
 	"github.com/gin-gonic/gin"
 )
