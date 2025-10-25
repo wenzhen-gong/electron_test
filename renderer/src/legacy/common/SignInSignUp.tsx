@@ -9,9 +9,11 @@ const SignInSignUp: React.FC = () => {
       <Button
         variant="outlined"
         color="secondary"
-      // onClick={() => {
-      //   navigate('/result/' + sessionId + '/' + 1660926192826);
-      // }}
+        onClick={async () => {
+          const response = await fetch('http://localhost:8080/users');
+          const result = await response.json();
+          console.log(result)
+        }}
       >
         Sign In
       </Button>
