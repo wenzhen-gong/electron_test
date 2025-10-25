@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gin2025/config"
-	"gin2025/routes"
+	"kaskade_backend/config"
+	"kaskade_backend/routes"
 	"log"
 	"os"
 
