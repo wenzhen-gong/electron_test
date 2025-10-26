@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	"kaskade_backend/config"
+	"kaskade_backend/db"
 	"kaskade_backend/models"
 	"net/http"
 	"time"
@@ -19,7 +19,7 @@ func GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
-	collection := config.GetCollection("users")
+	collection := db.GetCollection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	var user models.User
