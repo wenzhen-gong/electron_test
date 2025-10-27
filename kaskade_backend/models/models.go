@@ -3,9 +3,8 @@ package models
 import (
 	"time"
 
-	"gorm.io/datatypes"
-
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 )
 
 type User struct {
