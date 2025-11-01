@@ -11,9 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var DB *gorm.DB
-
-func Init() {
+func Init() *gorm.DB {
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=require",
@@ -35,6 +33,6 @@ func Init() {
 		log.Fatalf("❌ Failed to migrate database: %v", err)
 	}
 
-	DB = db
 	log.Println("✅ Database connected and migrated successfully")
+	return db
 }
