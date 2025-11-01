@@ -8,25 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// func GetUsers(c *gin.Context) {
-// collection := config.GetCollection("users")
-// ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-// defer cancel()
-// cursor, err := collection.Find(ctx, bson.M{})
-// if err != nil {
-// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	return
-// }
-// defer cursor.Close(ctx)
-// var users []models.User
-// if err := cursor.All(ctx, &users); err != nil {
-// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	return
-// }
-
-// 	c.JSON(http.StatusOK, users)
-// }
-
 func GetUsers(c *gin.Context, db *gorm.DB) {
 	var users []models.User
 	if err := db.Find(&users).Error; err != nil {
@@ -34,6 +15,24 @@ func GetUsers(c *gin.Context, db *gorm.DB) {
 		return
 	}
 	c.JSON(http.StatusOK, users)
+}
+
+func CreateUser(c *gin.Context, db *gorm.DB) {
+	var user models.User
+
+	// 尝试解析请求体为 JSON
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid JSON: " + err.Error(),
+		})
+		return
+	}
+	if err := db.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+
 }
 
 // func GetUser(c *gin.Context) {
@@ -55,24 +54,6 @@ func GetUsers(c *gin.Context, db *gorm.DB) {
 
 // }
 
-// func CreateUser(c *gin.Context) {
-// 	collection := config.GetCollection("users")
-// 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-// 	defer cancel()
-// 	var user models.User
-// 	if err := c.ShouldBindJSON(&user); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	user.ID = primitive.NewObjectID()
-// 	_, err := collection.InsertOne(ctx, user)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, user)
-
-// }
 // func DeleteUser(c *gin.Context) {
 // 	id := c.Param("id")
 // 	objID, err := primitive.ObjectIDFromHex(id)
