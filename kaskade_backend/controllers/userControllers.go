@@ -28,6 +28,14 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		})
 		return
 	}
+	// 查找是否已存在user
+	if db.Where("username = ?", user.Username).Find(&user).RowsAffected != 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "username exists"})
+		return
+	} else if db.Where("email = ?", user.Email).Find(&user).RowsAffected != 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "email exists"})
+		return
+	}
 	HashedPassord, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
