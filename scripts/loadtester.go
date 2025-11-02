@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -22,9 +23,10 @@ type Config struct {
 }
 
 type Result struct {
-	AvgTimeMs float64 `json:"avgTimeMs"`
-	Success   int     `json:"success"`
-	Failures  int     `json:"failures"`
+	AvgTimeMs        float64         `json:"avgTimeMs"`
+	Success          int             `json:"success"`
+	Failures         int             `json:"failures"`
+	PercentileTimeMs map[int]float64 `json:"percentileTimeMs"`
 }
 
 func main() {
@@ -78,12 +80,34 @@ func main() {
 
 	wg.Wait()
 
+	// 对times数组从小到大排序
+	sort.Slice(times, func(i, j int) bool {
+		return times[i] < times[j]
+	})
+
+	// 计算百分位数
+	percentileTimeMs := make(map[int]float64)
+	if config.Count > 0 {
+		for i := 0; i <= 100; i++ {
+			var index int
+			if i == 100 {
+				index = config.Count - 1 // p100 是最大值
+			} else {
+				index = int(float64(config.Count) * float64(i) / 100.0)
+				if index >= config.Count {
+					index = config.Count - 1
+				}
+			}
+			percentileTimeMs[i] = float64(times[index].Seconds()) * 1000.0
+		}
+	}
+
 	var total time.Duration
 	for _, t := range times {
 		total += t
 	}
 
 	avg := total.Seconds() * 1000 / float64(config.Count)
-	result := Result{AvgTimeMs: avg, Success: success, Failures: failures}
+	result := Result{AvgTimeMs: avg, Success: success, Failures: failures, PercentileTimeMs: percentileTimeMs}
 	json.NewEncoder(os.Stdout).Encode(result)
 }

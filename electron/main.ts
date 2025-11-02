@@ -28,11 +28,18 @@ ipcMain.handle('run-load-test', async (_event, config) => {
     let output = '';
     child.stdout.on('data', (data) => (output += data));
     child.stderr.on('data', (data) => console.error(data.toString()));
-    child.on('close', () => {
+    child.on('close', (code) => {
       try {
+        // 移除可能的换行符和空白字符
+        output = output.trim();
+        console.log('Raw output from loadtester:', output);
         const result = JSON.parse(output);
+        console.log('Parsed result:', result);
+        console.log('PercentileTimeMs:', result.percentileTimeMs);
         resolve(result);
       } catch (err) {
+        console.error('Failed to parse JSON:', err);
+        console.error('Output was:', output);
         reject(err);
       }
     });
