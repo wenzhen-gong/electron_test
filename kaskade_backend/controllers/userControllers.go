@@ -81,25 +81,15 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 
 }
 
-// func DeleteUser(c *gin.Context) {
-// 	id := c.Param("id")
-// 	objID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
-// 		return
-// 	}
-// 	collection := config.GetCollection("users")
-// 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-// 	defer cancel()
+func DeleteUser(c *gin.Context, db *gorm.DB) {
+	username := c.Param("username")
+	if db.Where("username = ?", username).Delete(&models.User{}).RowsAffected != 1 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found, deletion failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
+}
 
-// 	_, err = collection.DeleteOne(ctx, bson.M{"_id": objID})
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
-
-// }
 // func UpdateUser(c *gin.Context) {
 
 // 	id := c.Param("id")
