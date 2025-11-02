@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +28,14 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		})
 		return
 	}
+	HashedPassord, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Hashing failed: " + err.Error(),
+		})
+		return
+	}
+	user.PasswordHash = string(HashedPassord)
 	if err := db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
