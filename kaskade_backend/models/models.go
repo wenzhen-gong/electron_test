@@ -18,7 +18,15 @@ type User struct {
 	// 一对多：一个用户对应多条请求记录
 	RequestHistories []RequestHistory `gorm:"foreignKey:UserID" json:"request_histories,omitempty"`
 }
-
+type RegisterRequest struct {
+	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
 type RequestHistory struct {
 	ID                uint           `gorm:"primaryKey" json:"id"`
 	UserID            uuid.UUID      `gorm:"type:uuid;not null;index" json:"user_id"`
