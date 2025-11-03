@@ -90,39 +90,42 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
 }
 
-// func UpdateUser(c *gin.Context) {
+func UpdateUser(c *gin.Context, db *gorm.DB) {
+	username := c.Param("username")
 
-// 	id := c.Param("id")
-// 	objID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
-// 		return
-// 	}
+	var existingUser models.User
+	if err := db.Where("username = ?", username).First(&existingUser).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
 
-// 	collection := config.GetCollection("users")
-// 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-// 	defer cancel()
+	var updatedData struct {
+		Email    string `json:"email"`
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 
-// 	var updateData map[string]interface{}
-// 	delete(updateData, "_id")
+	if err := c.ShouldBindJSON(&updatedData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	if err := c.ShouldBindJSON(&updateData); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
+	// 只更新提供的字段
+	if updatedData.Email != "" {
+		existingUser.Email = updatedData.Email
+	}
+	if updatedData.Username != "" {
+		existingUser.Username = updatedData.Username
+	}
+	if updatedData.Password != "" {
+		hashed, _ := bcrypt.GenerateFromPassword([]byte(updatedData.Password), bcrypt.DefaultCost)
+		existingUser.PasswordHash = string(hashed)
+	}
 
-// 	update := bson.M{"$set": updateData}
-// 	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	if err := db.Save(&existingUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	// var user models.User
-// 	// if err := c.ShouldBindJSON(&user); err != nil {
-// 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 	// 	return
-// 	// }
-// 	// _, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": user})
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, updateData)
-// }
+	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
+}
