@@ -58,25 +58,25 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 
 func GetUser(c *gin.Context, db *gorm.DB) {
 	var req models.LoginRequest
-	var founduser models.User
+	var foundUser models.User
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid JSON: " + err.Error(),
 		})
 		return
 	}
-	result := db.Where("username = ?", req.Username).Find(&founduser)
+	result := db.Where("username = ?", req.Username).Find(&foundUser)
 	if result.RowsAffected == 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "username does not exist"})
 		return
 	} else {
-		if err := bcrypt.CompareHashAndPassword([]byte(founduser.PasswordHash), []byte(req.Password)); err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(req.Password)); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "Wrong password",
 			})
 			return
 		}
-		c.JSON(http.StatusOK, founduser)
+		c.JSON(http.StatusOK, foundUser)
 	}
 
 }
