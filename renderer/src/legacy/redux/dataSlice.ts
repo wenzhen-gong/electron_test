@@ -191,6 +191,7 @@ const dataSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(runTest.fulfilled, (state, action) => {
       console.log(action.payload);
+      state.result = action.payload;
     });
   }
 });
