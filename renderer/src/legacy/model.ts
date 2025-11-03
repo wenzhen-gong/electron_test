@@ -1,3 +1,11 @@
+// Benchmark run result.
+export interface Result {
+  AvgTimeMs: number;
+  Success: number;
+  Failures: number;
+  PercentileTimeMs: Map<number, number>;
+}
+
 // TODO(jingjing): Clean up later.
 export interface PercentileStats {
   average: number;
@@ -106,4 +114,5 @@ export interface State {
   params: Param[];
   contentType: string | null;
   validUserInput: ValidUserInput;
+  result?: Result;
 }
