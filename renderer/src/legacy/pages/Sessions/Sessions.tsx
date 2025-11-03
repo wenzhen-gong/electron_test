@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import OverviewTab from './tabs/OverviewTab';
 import RunTab from './tabs/RunTab';
 import AuthorizationTab from './tabs/AuthorizationTab';
-import PreviousResultsTab from './tabs/PreviousResultsTab';
+import ResultTab from './tabs/ResultTab';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import PropTypes from 'prop-types';
@@ -121,7 +121,7 @@ const Sessions: React.FC = () => {
             <Tab label="Overview" {...a11yProps(0)} />
             <Tab label="Authorization" {...a11yProps(1)} />
             <Tab label="Run" {...a11yProps(2)} />
-            <Tab label="Previous Results" {...a11yProps(3)} />
+            <Tab label="Result" {...a11yProps(3)} />
           </Tabs>
         </Box>
         <CustomTabPanel value={currentTab} index={0}>
@@ -134,7 +134,7 @@ const Sessions: React.FC = () => {
           <RunTab />
         </CustomTabPanel>
         <CustomTabPanel value={currentTab} index={3}>
-          <PreviousResultsTab />
+          <ResultTab />
         </CustomTabPanel>
       </Box>
     </SessionsDiv>
