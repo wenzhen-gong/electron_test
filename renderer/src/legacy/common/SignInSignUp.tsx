@@ -12,7 +12,7 @@ const SignInSignUp: React.FC = () => {
         onClick={async () => {
           const response = await fetch('http://localhost:8080/users');
           const result = await response.json();
-          console.log(result)
+          console.log(result);
         }}
       >
         Sign In

@@ -9,3 +9,5 @@ eslint.config.mjs
 .prettierignore
 kaskade_backend/go.mod
 kaskade_backend/go.sum
+kaskade_backend/.env
+kaskade_backend/tmp
