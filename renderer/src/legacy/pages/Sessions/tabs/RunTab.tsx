@@ -27,7 +27,11 @@ import {
 import { RootState } from '../../../redux/store';
 import { Header, Param, RunTabConfig, ValidUserInput } from '../../../model';
 
-const RunTab: React.FC = () => {
+interface RunTabProps {
+  setCurrentTab?: (tab: number) => void;
+}
+
+const RunTab: React.FC<RunTabProps> = (props) => {
   const navigate = useNavigate();
   // const params = useParams();
   // const sessionId = params.id;
@@ -36,8 +40,7 @@ const RunTab: React.FC = () => {
   const validUserInput = useSelector((state: RootState) => state.validUserInput);
   const headers = useSelector((state: RootState) => state.headers);
   const params = useSelector((state: RootState) => state.params);
-
-  // const contentType = useSelector((state) => state.contentType);
+  const contentType = useSelector((state: RootState) => state.contentType);
   useEffect(() => {
     return () => {
       // console.log('Resetting runTabConfig and validUserInput');
@@ -208,9 +211,8 @@ const RunTab: React.FC = () => {
           <InputLabel id="method-label">HTTP Method</InputLabel>
           <Select
             labelId="method-label"
-            // value={httpMethod}
+            value={runTabConfig.httpMethod || ''}
             onChange={(e) => {
-              // setHttpMethod(e.target.value);
               handleInputChange('httpMethod', e.target.value);
             }}
             input={<OutlinedInput label="HTTP Method" />}
@@ -224,7 +226,7 @@ const RunTab: React.FC = () => {
         <TextField
           label="URL"
           variant="outlined"
-          value={runTabConfig.URL}
+          value={runTabConfig.URL || ''}
           onChange={(e) => {
             handleInputChange('URL', e.target.value);
           }}
@@ -235,9 +237,8 @@ const RunTab: React.FC = () => {
           label="Test Duration"
           type="number"
           variant="outlined"
-          // value={testDuration}
+          value={runTabConfig.testDuration || ''}
           onChange={(e) => {
-            // setTestDuration(e.target.value);
             handleInputChange('testDuration', e.target.value);
           }}
           fullWidth
@@ -247,7 +248,7 @@ const RunTab: React.FC = () => {
           label="Concurrency Number"
           type="number"
           variant="outlined"
-          // value={concurrencyNumber}
+          value={runTabConfig.concurrencyNumber || ''}
           onChange={(e) => {
             handleInputChange('concurrencyNumber', e.target.value);
           }}
@@ -258,7 +259,7 @@ const RunTab: React.FC = () => {
           label="Total Requests"
           type="number"
           variant="outlined"
-          // value={totalRequests}
+          value={runTabConfig.totalRequests || ''}
           onChange={(e) => {
             handleInputChange('totalRequests', e.target.value);
           }}
@@ -307,9 +308,8 @@ const RunTab: React.FC = () => {
         <TextField
           label="Request Body"
           variant="outlined"
-          // value={reqBody}
+          value={runTabConfig.reqBody || ''}
           onChange={(e) => {
-            // setReqBody(e.target.value);
             handleInputChange('reqBody', e.target.value);
           }}
           fullWidth
@@ -410,14 +410,20 @@ const RunTab: React.FC = () => {
         }}
       >
         <FormControl fullWidth variant="outlined">
-          <InputLabel id="method-label">Content Type</InputLabel>
+          <InputLabel id="content-type-label">Content Type</InputLabel>
           <Select
-            labelId="method-label"
-            // value={contentType}
+            labelId="content-type-label"
+            value={
+              contentType === 'application/json'
+                ? 'JSON'
+                : contentType === 'text/plain'
+                  ? 'Text'
+                  : ''
+            }
             onChange={(e) => {
               if (e.target.value === 'JSON') {
                 store.dispatch(setContentType('application/json'));
-              } else {
+              } else if (e.target.value === 'Text') {
                 store.dispatch(setContentType('text/plain'));
               }
             }}

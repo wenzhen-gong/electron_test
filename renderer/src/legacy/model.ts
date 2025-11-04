@@ -1,9 +1,9 @@
 // Benchmark run result.
 export interface Result {
-  AvgTimeMs: number;
-  Success: number;
-  Failures: number;
-  PercentileTimeMs: Map<number, number>;
+  avgTimeMs: number;
+  success: number;
+  failures: number;
+  percentileTimeMs: Record<number, number>;
 }
 
 // TODO(jingjing): Clean up later.
