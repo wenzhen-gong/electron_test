@@ -76,7 +76,9 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 			})
 			return
 		}
-		c.JSON(http.StatusOK, foundUser)
+		c.Set("user", foundUser)
+		c.Next()
+		// c.JSON(http.StatusOK, foundUser)
 	}
 
 }
