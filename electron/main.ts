@@ -33,6 +33,8 @@ ipcMain.handle('run-load-test', async (_event, config) => {
         const result = JSON.parse(output);
         resolve(result);
       } catch (err) {
+        console.error('Failed to parse JSON:', err);
+        console.error('Output was:', output);
         reject(err);
       }
     });
