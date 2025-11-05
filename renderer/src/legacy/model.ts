@@ -1,108 +1,118 @@
-export interface PercentileStats {
-    average: number;
-    mean: number;
-    stddev: number;
-    min: number;
-    max: number;
-    total: number;
-    p0_001: number;
-    p0_01: number;
-    p0_1: number;
-    p1: number;
-    p2_5: number;
-    p10: number;
-    p25: number;
-    p50: number;
-    p75: number;
-    p90: number;
-    p97_5: number;
-    p99: number;
-    p99_9: number;
-    p99_99: number;
-    p99_999: number;
-}
-
-export interface LatencyStats {
-    [requestName: string]: PercentileStats;
-}
-
-export interface ThroughputStats {
-    [requestName: string]: PercentileStats;
-}
-
+// Benchmark run result.
 export interface Result {
-    latencyStats: LatencyStats;
-    requestThroughputStats: ThroughputStats | PercentileStats;
-    byteThroughputStats: ThroughputStats | PercentileStats;
-    averagRequestThroughput: number;
-    averageByteThroughput: number;
+  avgTimeMs: number;
+  success: number;
+  failures: number;
+  percentileTimeMs: Record<number, number>;
 }
 
-export interface HistoryEntry {
-    timestamp: number;
-    testDuration: number;
-    concurrentUsers: number;
-    targetThroughput: number;
-    numOfWorkers: number;
-    result: Result;
+// TODO(jingjing): Clean up later.
+export interface PercentileStats {
+  average: number;
+  mean: number;
+  stddev: number;
+  min: number;
+  max: number;
+  total: number;
+  p0_001: number;
+  p0_01: number;
+  p0_1: number;
+  p1: number;
+  p2_5: number;
+  p10: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p90: number;
+  p97_5: number;
+  p99: number;
+  p99_9: number;
+  p99_99: number;
+  p99_999: number;
 }
 
-export type History = HistoryEntry[];
+// TODO(jingjing): Clean up later.
+export interface LatencyStats {
+  [requestName: string]: PercentileStats;
+}
+
+// TODO(jingjing): Clean up later.
+export interface ThroughputStats {
+  [requestName: string]: PercentileStats;
+}
+
+// TODO(jingjing): Clean up later.
+export interface LegacyResult {
+  latencyStats: LatencyStats;
+  requestThroughputStats: ThroughputStats | PercentileStats;
+  byteThroughputStats: ThroughputStats | PercentileStats;
+  averagRequestThroughput: number;
+  averageByteThroughput: number;
+}
+
+export interface History {
+  timestamp: number;
+  testDuration: number;
+  concurrentUsers: number;
+  targetThroughput: number;
+  numOfWorkers: number;
+  result: LegacyResult;
+}
 
 export interface Request {
-    "requestId": number,
-    "requestName": string,
-    "url": string,
-    "method": 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-    "headers"?: Record<string, string>
+  requestId: number;
+  requestName: string;
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  headers?: Record<string, string>;
 }
 
 export interface Session {
-    "sessionId": number,
-    "sessionName": string
-    "overview": string,
-    "createdBy": string,
-    "createdOn": number,
-    "lastModified": number,
-    "servers": string[],
-    "requests": Request[],
-    "history": History[]
+  sessionId: number;
+  sessionName: string;
+  overview: string;
+  createdBy: string;
+  createdOn: number;
+  lastModified: number;
+  servers: string[];
+  requests: Request[];
+  history: History[];
 }
 
 // RunTab相关的类型定义
 export interface RunTabConfig {
-    URL?: string;
-    httpMethod?: string;
-    reqBody?: string;
-    testDuration?: number;
-    concurrencyNumber?: number;
-    totalRequests?: number;
-    [key: string]: string | number | undefined;
+  URL?: string;
+  httpMethod?: string;
+  reqBody?: string;
+  testDuration?: number;
+  concurrencyNumber?: number;
+  totalRequests?: number;
+  [key: string]: string | number | undefined;
 }
 
 export interface Header {
-    key: string;
-    value: string;
+  key: string;
+  value: string;
 }
 
 export interface Param {
-    key: string;
-    value: string;
+  key: string;
+  value: string;
 }
 
 export interface ValidUserInput {
-    valid: boolean;
-    flag: boolean;
-    error: string | null;
+  valid: boolean;
+  flag: boolean;
+  error: string | null;
 }
 
 export interface State {
-    datafile: Session[],
-    configFile?: Session,
-    runTabConfig: RunTabConfig,
-    headers: Header[],
-    params: Param[],
-    contentType: string | null,
-    validUserInput: ValidUserInput
+  datafile: Session[];
+  configFile?: Session;
+  runTabConfig: RunTabConfig;
+  headers: Header[];
+  params: Param[];
+  contentType: string | null;
+  validUserInput: ValidUserInput;
+  result?: Result;
 }
-

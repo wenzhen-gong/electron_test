@@ -11,7 +11,9 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 import { RootState } from '../../redux/store';
-import { HistoryEntry, PercentileStats } from '../../model';
+import { History, PercentileStats } from '../../model';
+
+// TODO(jingjing): Deprecated. Remove later.
 
 // Render the page.
 const ResultDiv = styled.div`
@@ -29,7 +31,7 @@ const Result: React.FC<ResultProps> = (props) => {
   const runId = params.runId;
 
   // Get the state of this session.
-  const resultState = useSelector((state: RootState) => {
+  const resultState: History | null = useSelector((state: RootState) => {
     for (let i = 0; i < state.datafile.length; i++) {
       if (state.datafile[i].sessionId.toString() === sessionId) {
         for (let j = 0; j < state.datafile[i].history.length; j++) {
@@ -41,11 +43,6 @@ const Result: React.FC<ResultProps> = (props) => {
     }
     return null;
   });
-  //console.log("result State: ", resultState)
-  const demoData = useSelector((state: RootState) => {
-    return state.demo;
-  });
-  //console.log("demoData: ", demoData)
 
   if (!resultState) {
     return (
@@ -53,7 +50,6 @@ const Result: React.FC<ResultProps> = (props) => {
         <div>
           <p>Unknown result Id: {runId}</p>
         </div>
-        <div>RESULT: {JSON.stringify(demoData)}</div>
       </>
     );
   }

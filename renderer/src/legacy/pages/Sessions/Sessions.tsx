@@ -4,13 +4,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import OverviewTab from './tabs/OverviewTab';
 import RunTab from './tabs/RunTab';
 import AuthorizationTab from './tabs/AuthorizationTab';
-import PreviousResultsTab from './tabs/PreviousResultsTab';
+import ResultTab from './tabs/ResultTab';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
-import ListIcon from '@mui/icons-material/List';
 import Typography from '@mui/material/Typography';
 import { RootState } from '../../redux/store';
 
@@ -70,20 +68,21 @@ const Sessions: React.FC = () => {
   const navigate = useNavigate();
 
   // Tab bar's state that represents the currently selected tab.
-  // 0 = overview, 1 = authorization, 2 = run, 3 = previous results.
+  // 0 = overview, 1 = authorization, 2 = run, 3 = result.
   const [currentTab, setCurrentTab] = useState<number>(0); // Overview
   const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
     setCurrentTab(newValue);
   };
 
-  // useEffect(() => {
-  //     // Update the tab based on the selected session ID
-  //     if (id) {
-  //         setCurrentTab(0);   // Run
-  //     } else {
-  //         setCurrentTab(0);   // Overview
-  //     }
-  // }, [id]);
+  // Get result from state to detect when test completes
+  const result = useSelector((state: RootState) => state.result);
+
+  // Auto-switch to Result tab when test completes
+  useEffect(() => {
+    if (result) {
+      setCurrentTab(3); // Switch to Result tab (index 3)
+    }
+  }, [result]);
 
   return (
     <SessionsDiv>
@@ -121,7 +120,7 @@ const Sessions: React.FC = () => {
             <Tab label="Overview" {...a11yProps(0)} />
             <Tab label="Authorization" {...a11yProps(1)} />
             <Tab label="Run" {...a11yProps(2)} />
-            <Tab label="Previous Results" {...a11yProps(3)} />
+            <Tab label="Result" {...a11yProps(3)} />
           </Tabs>
         </Box>
         <CustomTabPanel value={currentTab} index={0}>
@@ -131,10 +130,10 @@ const Sessions: React.FC = () => {
           <AuthorizationTab />
         </CustomTabPanel>
         <CustomTabPanel value={currentTab} index={2}>
-          <RunTab />
+          <RunTab setCurrentTab={setCurrentTab} />
         </CustomTabPanel>
         <CustomTabPanel value={currentTab} index={3}>
-          <PreviousResultsTab />
+          <ResultTab />
         </CustomTabPanel>
       </Box>
     </SessionsDiv>

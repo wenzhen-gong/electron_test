@@ -7,7 +7,8 @@ const initialState: State = {
   headers: [],
   params: [],
   contentType: null,
-  validUserInput: { valid: false, flag: false, error: null }
+  validUserInput: { valid: false, flag: false, error: null },
+  result: undefined
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
@@ -46,7 +47,7 @@ const dataSlice = createSlice({
     setRunTabData: (state, action) => {
       state.runTabConfig = action.payload;
     },
-    
+
     resetRunTabConfig: (state) => {
       state.runTabConfig = {};
       state.headers = [];
@@ -54,28 +55,28 @@ const dataSlice = createSlice({
       state.contentType = null;
       state.validUserInput = { valid: false, flag: false, error: null };
     },
-    
+
     setContentType: (state, action) => {
       state.contentType = action.payload;
     },
-    
+
     setHeaders: (state, action) => {
       state.headers = action.payload;
     },
-    
+
     setParams: (state, action) => {
       state.params = action.payload;
       console.log(state.params)
     },
-    
+
     setValidUserInput: (state, action) => {
       state.validUserInput = action.payload;
     },
-    
+
     currentSessionConfig: (state, action) => {
       state.configFile = action.payload;
     },
-    
+
     createSession: (state) => {
       const sessionId = Date.now();
       const newSession: Session = {
@@ -94,7 +95,7 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-    
+
     addRequest: (state, action) => {
       const sessionId = action.payload.sessionId;
       const requestId = Date.now();
@@ -112,7 +113,7 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-    
+
     duplicateSession: (state, action) => {
       const oldSession = action.payload.session;
       const newSession = JSON.parse(JSON.stringify(oldSession)) as Session;
@@ -125,7 +126,7 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-    
+
     deleteSession: (state, action) => {
       const sessionId = action.payload.sessionId;
       for (let i = 0; i < state.datafile.length; i++) {
@@ -137,7 +138,7 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-    
+
     renameSession: (state, action) => {
       const sessionId = action.payload.sessionId;
       const newName = action.payload.newName;
@@ -151,7 +152,7 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-    
+
     updateSessionOverview: (state, action) => {
       const sessionId = action.payload.sessionId;
       const newOverview = action.payload.newOverview;
@@ -165,7 +166,7 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-    
+
     deleteRequest: (state, action) => {
       const sessionId = action.payload.sessionId;
       const requestId = action.payload.requestId;
@@ -190,6 +191,7 @@ const dataSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(runTest.fulfilled, (state, action) => {
       console.log(action.payload);
+      state.result = action.payload;
     });
   }
 });
