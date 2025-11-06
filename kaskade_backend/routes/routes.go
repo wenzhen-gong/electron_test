@@ -33,7 +33,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	r.PUT("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.UpdateUser(c, db)
 	})
-	r.DELETE("/users/:username", func(c *gin.Context) {
+	r.DELETE("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.DeleteUser(c, db)
 	})
 }
