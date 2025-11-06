@@ -20,15 +20,11 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		controllers.GetUser(c, db)
 	}, auth.CreateJWT, func(c *gin.Context) {
 		user, userExists := c.Get("user")
-		tokenString, tokenStringExists := c.Get("tokenString")
-
-		if !userExists || !tokenStringExists {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "user or token lost"})
+		if !userExists {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "user lost"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"user": user, "tokenString": tokenString})
-
+		c.JSON(http.StatusOK, gin.H{"user": user})
 	})
 	r.PUT("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.UpdateUser(c, db)

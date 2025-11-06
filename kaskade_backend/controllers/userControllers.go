@@ -32,15 +32,15 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 	var user models.User
 	// 查找是否已存在user
 	if db.Where("username = ?", req.Username).Find(&user).RowsAffected != 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "username exists"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "username exists"})
 		return
 	} else if db.Where("email = ?", req.Email).Find(&user).RowsAffected != 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "email exists"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "email exists"})
 		return
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 	user = models.User{
@@ -49,44 +49,37 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		PasswordHash: string(hashedPassword),
 	}
 	if err := db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, user)
-
 }
 
 func GetUser(c *gin.Context, db *gorm.DB) {
 	var req models.LoginRequest
 	var foundUser models.User
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid JSON: " + err.Error(),
-		})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request body: " + err.Error()})
 		return
 	}
 	result := db.Where("username = ?", req.Username).Find(&foundUser)
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "username does not exist"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "username does not exist"})
 		return
 	} else {
 		if err := bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(req.Password)); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Wrong password",
-			})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Wrong password"})
 			return
 		}
 		c.Set("user", foundUser)
 		c.Next()
-		// c.JSON(http.StatusOK, foundUser)
 	}
-
 }
 
 func DeleteUser(c *gin.Context, db *gorm.DB) {
 	username := c.Param("username")
 	if db.Where("username = ?", username).Delete(&models.User{}).RowsAffected != 1 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found, deletion failed"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "username not found, deletion failed"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
@@ -97,7 +90,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 
 	var existingUser models.User
 	if err := db.Where("username = ?", username).First(&existingUser).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -108,7 +101,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -125,7 +118,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	if err := db.Save(&existingUser).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
