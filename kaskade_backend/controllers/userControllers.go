@@ -55,7 +55,7 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, user)
 }
 
-func GetUser(c *gin.Context, db *gorm.DB) {
+func Login(c *gin.Context, db *gorm.DB) {
 	var req models.LoginRequest
 	var foundUser models.User
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -74,6 +74,10 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 		c.Set("user", foundUser)
 		c.Next()
 	}
+}
+func Logout(c *gin.Context) {
+	c.SetCookie("jwt", "", -1, "/", "localhost", true, true)
+	c.JSON(http.StatusOK, gin.H{"message": "logged out"})
 }
 
 func DeleteUser(c *gin.Context, db *gorm.DB) {

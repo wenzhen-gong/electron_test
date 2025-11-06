@@ -17,7 +17,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		controllers.CreateUser(c, db)
 	})
 	r.POST("/login", func(c *gin.Context) {
-		controllers.GetUser(c, db)
+		controllers.Login(c, db)
 	}, auth.CreateJWT, func(c *gin.Context) {
 		user, userExists := c.Get("user")
 		if !userExists {
@@ -32,4 +32,5 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	r.DELETE("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.DeleteUser(c, db)
 	})
+	r.POST("/logout", controllers.Logout)
 }
