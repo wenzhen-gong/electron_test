@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"kaskade_backend/auth"
 	"kaskade_backend/controllers"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -15,12 +17,20 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		controllers.CreateUser(c, db)
 	})
 	r.POST("/login", func(c *gin.Context) {
-		controllers.GetUser(c, db)
+		controllers.Login(c, db)
+	}, auth.CreateJWT, func(c *gin.Context) {
+		user, userExists := c.Get("user")
+		if !userExists {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "user lost"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"user": user})
 	})
-	r.PUT("/users/:username", func(c *gin.Context) {
+	r.PUT("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.UpdateUser(c, db)
 	})
-	r.DELETE("/users/:username", func(c *gin.Context) {
+	r.DELETE("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.DeleteUser(c, db)
 	})
+	r.POST("/logout", controllers.Logout)
 }
