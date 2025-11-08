@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import store from '../../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   setValidUserInput,
   setRunTabData,

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { Request, Session, State, RunTabConfig, Header, Param, ValidUserInput } from '../model'
+import { Request, Session, State,SignupFormData, RunTabConfig, Header, Param, ValidUserInput } from '../model'
 
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
@@ -8,7 +8,12 @@ const initialState: State = {
   params: [],
   contentType: null,
   validUserInput: { valid: false, flag: false, error: null },
-  result: undefined
+  result: undefined,
+  // 这里开始是signup signin的model里面的state
+  signupError: null,
+  openSignUp: false,
+  signupLoading: false,
+  signupFormData: { username: '', email: '', password: '' }
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
@@ -185,7 +190,18 @@ const dataSlice = createSlice({
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile))
     },
-
+    setSignupError: (state, action) => {
+      state.signupError = action.payload;
+    },
+    setOpenSignUp: (state, action) => {
+      state.openSignUp = action.payload;
+    },
+    setSignupLoading: (state, action) => {
+      state.signupLoading = action.payload;
+    },
+    setSignupFormData: (state, action) => {
+      state.signupFormData = action.payload;
+    }
   },
   // Reducers for asyncthunk
   extraReducers: (builder) => {
@@ -211,7 +227,11 @@ export const {
   deleteSession,
   renameSession,
   updateSessionOverview,
-  deleteRequest
+  deleteRequest,
+  setSignupError,
+  setOpenSignUp,
+  setSignupLoading,
+  setSignupFormData
 } = dataSlice.actions;
 
 export default dataSlice.reducer;

@@ -99,6 +99,11 @@ export interface Param {
   key: string;
   value: string;
 }
+export interface SignupFormData {
+  username: string;
+  email: string;
+  password: string;
+}
 
 export interface ValidUserInput {
   valid: boolean;
@@ -115,4 +120,8 @@ export interface State {
   contentType: string | null;
   validUserInput: ValidUserInput;
   result?: Result;
+  signupError: string | null;
+  openSignUp: boolean;
+  signupLoading: boolean;
+  signupFormData: SignupFormData;
 }
