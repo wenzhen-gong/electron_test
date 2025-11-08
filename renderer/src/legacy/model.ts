@@ -105,6 +105,11 @@ export interface SignupFormData {
   password: string;
 }
 
+export interface SigninFormData {
+  username: string;
+  password: string;
+}
+
 export interface ValidUserInput {
   valid: boolean;
   flag: boolean;
@@ -121,7 +126,12 @@ export interface State {
   validUserInput: ValidUserInput;
   result?: Result;
   signupError: string | null;
-  openSignUp: boolean;
+  openSignup: boolean;
   signupLoading: boolean;
   signupFormData: SignupFormData;
+
+  signinError: string | null;
+  openSignin: boolean;
+  signinLoading: boolean;
+  signinFormData: SigninFormData;
 }

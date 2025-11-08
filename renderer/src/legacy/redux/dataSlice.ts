@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { Request, Session, State,SignupFormData, RunTabConfig, Header, Param, ValidUserInput } from '../model'
+import { Request, Session, State, RunTabConfig, Header, Param, ValidUserInput } from '../model'
 
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
@@ -11,9 +11,14 @@ const initialState: State = {
   result: undefined,
   // 这里开始是signup signin的model里面的state
   signupError: null,
-  openSignUp: false,
+  openSignup: false,
   signupLoading: false,
-  signupFormData: { username: '', email: '', password: '' }
+  signupFormData: { username: '', email: '', password: '' },
+
+  signinError: null,
+  openSignin: false,
+  signinLoading: false,
+  signinFormData: { username: '', password: '' }
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
@@ -193,14 +198,27 @@ const dataSlice = createSlice({
     setSignupError: (state, action) => {
       state.signupError = action.payload;
     },
-    setOpenSignUp: (state, action) => {
-      state.openSignUp = action.payload;
+    setOpenSignup: (state, action) => {
+      state.openSignup = action.payload;
     },
     setSignupLoading: (state, action) => {
       state.signupLoading = action.payload;
     },
     setSignupFormData: (state, action) => {
       state.signupFormData = action.payload;
+    },
+
+    setSigninError: (state, action) => {
+      state.signinError = action.payload;
+    },
+    setOpenSignin: (state, action) => {
+      state.openSignin = action.payload;
+    },
+    setSigninLoading: (state, action) => {
+      state.signinLoading = action.payload;
+    },
+    setSigninFormData: (state, action) => {
+      state.signinFormData = action.payload;
     }
   },
   // Reducers for asyncthunk
@@ -229,9 +247,13 @@ export const {
   updateSessionOverview,
   deleteRequest,
   setSignupError,
-  setOpenSignUp,
+  setOpenSignup,
   setSignupLoading,
-  setSignupFormData
+  setSignupFormData,
+  setSigninError,
+  setOpenSignin,
+  setSigninLoading,
+  setSigninFormData
 } = dataSlice.actions;
 
 export default dataSlice.reducer;
