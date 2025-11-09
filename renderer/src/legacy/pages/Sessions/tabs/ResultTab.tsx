@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   Table,
   TableBody,
   TableCell,
@@ -65,11 +64,18 @@ const ResultTab: React.FC<ResultTabProps> = () => {
   }));
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Grid container spacing={3}>
+    <Box sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(4, minmax(0, 1fr))' },
+          gap: 3,
+          flexShrink: 0
+        }}
+      >
         {/* Summary Cards */}
-        <Grid item xs={12} md={3}>
-          <Card>
+        <Box sx={{ display: 'flex' }}>
+          <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <AccessTimeIcon sx={{ mr: 1, color: 'primary.main' }} />
@@ -80,10 +86,10 @@ const ResultTab: React.FC<ResultTabProps> = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={3}>
-          <Card>
+        <Box sx={{ display: 'flex' }}>
+          <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircleIcon sx={{ mr: 1, color: 'success.main' }} />
@@ -103,10 +109,10 @@ const ResultTab: React.FC<ResultTabProps> = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={3}>
-          <Card>
+        <Box sx={{ display: 'flex' }}>
+          <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <ErrorIcon sx={{ mr: 1, color: 'error.main' }} />
@@ -122,10 +128,10 @@ const ResultTab: React.FC<ResultTabProps> = () => {
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={3}>
-          <Card>
+        <Box sx={{ display: 'flex' }}>
+          <Card sx={{ flexGrow: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Total Requests
@@ -135,17 +141,30 @@ const ResultTab: React.FC<ResultTabProps> = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
+      </Box>
 
+      <Box
+        sx={{
+          mt: 3,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+          gap: 3,
+          flexGrow: 1,
+          minHeight: 0
+        }}
+      >
         {/* Key Percentiles */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
+        <Box sx={{ display: 'flex', minHeight: 0 }}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+            <CardContent
+              sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
+            >
               <Typography variant="h6" gutterBottom>
                 Key Percentiles
               </Typography>
-              <TableContainer>
-                <Table size="small">
+              <TableContainer sx={{ flexGrow: 1, minHeight: 0 }}>
+                <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
                       <TableCell>
@@ -182,18 +201,21 @@ const ResultTab: React.FC<ResultTabProps> = () => {
               </TableContainer>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
         {/* All Percentiles */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
+        <Box sx={{ display: 'flex', minHeight: 0 }}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+            <CardContent
+              sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
+            >
               <Typography variant="h6" gutterBottom>
                 All Percentiles
               </Typography>
               <Box
                 sx={{
-                  maxHeight: 400,
+                  flexGrow: 1,
+                  minHeight: 0,
                   overflowY: 'auto',
                   border: '1px solid',
                   borderColor: 'divider',
@@ -226,8 +248,8 @@ const ResultTab: React.FC<ResultTabProps> = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 };
