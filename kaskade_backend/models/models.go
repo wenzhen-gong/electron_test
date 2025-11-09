@@ -45,3 +45,11 @@ type RequestHistory struct {
 	// 外键关系
 	User User `gorm:"constraint:OnDelete:CASCADE" json:"-"`
 }
+type BenchmarkResult struct {
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	Timestamp time.Time      `gorm:"autoCreateTime" json:"timestamp"`
+	SessionID string         `gorm:"type:varchar(100)" json:"session_id"`
+	Version   string         `gorm:"type:varchar(50)" json:"version"`
+	Config    datatypes.JSON `json:"config"`
+	Result    datatypes.JSON `json:"result"`
+}
