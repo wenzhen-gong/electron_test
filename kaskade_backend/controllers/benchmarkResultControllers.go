@@ -49,5 +49,8 @@ func AddBenchmarkResult(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, record)
+	c.JSON(http.StatusCreated, gin.H{
+		"id":        record.ID,
+		"timestamp": record.Timestamp,
+	})
 }
