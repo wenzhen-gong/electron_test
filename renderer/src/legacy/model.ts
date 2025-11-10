@@ -115,6 +115,10 @@ export interface ValidUserInput {
   flag: boolean;
   error: string | null;
 }
+export interface User {
+  username: string;
+  email: string;
+}
 
 export interface State {
   datafile: Session[];
@@ -134,4 +138,6 @@ export interface State {
   openSignin: boolean;
   signinLoading: boolean;
   signinFormData: SigninFormData;
+
+  user: User | null;
 }

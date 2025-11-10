@@ -9,7 +9,8 @@ import {
   setSigninError,
   setOpenSignin,
   setSigninLoading,
-  setSigninFormData
+  setSigninFormData,
+  setUser
 } from '../redux/dataSlice';
 import {
   Button,
@@ -84,15 +85,15 @@ const SignInSignUp: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || '注册失败');
+        throw new Error(result.error || 'Sign up failed');
       }
 
       // 注册成功
-      console.log('注册成功:', result);
+      console.log('Sign up successful', result);
       handleCloseSignup();
       // 可以在这里添加成功提示或自动登录逻辑
     } catch (err) {
-      store.dispatch(setSignupError(err instanceof Error ? err.message : '注册失败，请重试'));
+      store.dispatch(setSignupError(err instanceof Error ? err.message : 'Sign up failed, retry'));
     } finally {
       store.dispatch(setSignupLoading(false));
     }
@@ -118,11 +119,11 @@ const SignInSignUp: React.FC = () => {
       }
 
       // 登陆成功
-      console.log('Sign in successful:', result);
+      store.dispatch(setUser(result));
       handleCloseSignin();
       // 可以在这里添加成功提示或自动登录逻辑
     } catch (err) {
-      store.dispatch(setSigninError(err instanceof Error ? err.message : '注册失败，请重试'));
+      store.dispatch(setSigninError(err instanceof Error ? err.message : 'Sign in failed, retry'));
     } finally {
       store.dispatch(setSigninLoading(false));
     }
@@ -140,13 +141,13 @@ const SignInSignUp: React.FC = () => {
       </Stack>
 
       <Dialog open={openSignup} onClose={handleCloseSignup} maxWidth="sm" fullWidth>
-        <DialogTitle>注册账户</DialogTitle>
+        <DialogTitle>Sign Up</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             {signupError && <Alert severity="error">{signupError}</Alert>}
             <TextField
               name="username"
-              label="用户名"
+              label="Username"
               fullWidth
               value={signupFormData.username}
               onChange={handleSignupInputChange}
@@ -154,7 +155,7 @@ const SignInSignUp: React.FC = () => {
             />
             <TextField
               name="email"
-              label="邮箱"
+              label="Email"
               type="email"
               fullWidth
               value={signupFormData.email}
@@ -163,7 +164,7 @@ const SignInSignUp: React.FC = () => {
             />
             <TextField
               name="password"
-              label="密码"
+              label="Password"
               type="password"
               fullWidth
               value={signupFormData.password}
@@ -173,7 +174,7 @@ const SignInSignUp: React.FC = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseSignup}>取消</Button>
+          <Button onClick={handleCloseSignup}>Cancel</Button>
           <Button
             onClick={handleSignup}
             variant="contained"
@@ -196,7 +197,7 @@ const SignInSignUp: React.FC = () => {
             {signinError && <Alert severity="error">{signinError}</Alert>}
             <TextField
               name="username"
-              label="用户名"
+              label="Username"
               fullWidth
               value={signinFormData.username}
               onChange={handleSigninInputChange}
@@ -204,7 +205,7 @@ const SignInSignUp: React.FC = () => {
             />
             <TextField
               name="password"
-              label="密码"
+              label="Password"
               type="password"
               fullWidth
               value={signinFormData.password}

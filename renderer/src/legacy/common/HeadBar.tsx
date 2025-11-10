@@ -1,13 +1,12 @@
-import React from 'react';
 import { SyntheticEvent } from 'react';
 import styled from 'styled-components';
 import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
 import SignInSignUp from './SignInSignUp';
 import type { RootState } from '../redux/store';
+import UserInfo from './UserInfo';
 
 const HeadBarContainer = styled.div`
   background-color: #1e1e1e;
@@ -84,6 +83,7 @@ const HeadBar = () => {
     }
   };
 
+  const user = useSelector((state: RootState) => state.user);
   return (
     <HeadBarContainer>
       <LogoDiv>KASKADE</LogoDiv>
@@ -97,7 +97,8 @@ const HeadBar = () => {
           onChange={handleSelect}
         />
       </SearchDiv>
-      <SignInSignUp />
+      {user && <UserInfo username={user.username} email={user.email} />}
+      {!user && <SignInSignUp />}
     </HeadBarContainer>
   );
 };

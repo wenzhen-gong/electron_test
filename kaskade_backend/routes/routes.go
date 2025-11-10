@@ -24,7 +24,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "user lost"})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"user": user})
+		c.JSON(http.StatusOK, user)
 	})
 	r.PUT("/users/:username", auth.AuthRequired, func(c *gin.Context) {
 		controllers.UpdateUser(c, db)
