@@ -16,7 +16,7 @@ const NavDiv = styled.div`
 `;
 
 interface NavBarProps {
-  page: String;
+  page: string;
 }
 
 const NavBarDiv: React.FC<NavBarProps> = (props: NavBarProps) => {

@@ -46,7 +46,7 @@ const SearchDiv = styled.div`
   height: 40px;
 `;
 
-const HeadBar = () => {
+const HeadBar: React.FC = () => {
   const navigate = useNavigate();
 
   // Get all sessions from data file.
@@ -72,7 +72,7 @@ const HeadBar = () => {
     }
   }
 
-  const handleSelect = (e: SyntheticEvent, newValue: string | null) => {
+  const handleSelect = (e: SyntheticEvent, newValue: string | null): void => {
     console.log('Selection is: ', newValue);
     for (let i = 0; i < allValues.length; ++i) {
       if (allValues[i] === newValue) {
