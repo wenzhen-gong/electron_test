@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { Request, Session, State, RunTabConfig, Header, Param, ValidUserInput } from '../model'
+import { Request, Session, State, Result, ResultMetadata } from '../model'
 
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
@@ -28,12 +28,30 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
     finalHeaders[header.key] = header.value;
   });
   // console.log('finalHeaders in runTest Thunk: ', finalHeaders);
-  let finalRunTabConfig = { ...state.runTabConfig, finalHeaders };
+  const finalRunTabConfig = { ...state.runTabConfig, finalHeaders };
   // finalRunTabConfig.URL = finalURL;
   console.log('finalRunTabConfig in runTest Thunk: ', finalRunTabConfig);
 
-  const result = await window.api.runLoadTest(finalRunTabConfig);
-  return result;
+  const result: Result = await window.api.runLoadTest(finalRunTabConfig);
+
+  // Send a fetch request to backend to save result
+  const saveResultRequest = {
+    sessionId: state.datafile[0].sessionId,
+    version: '1.0.0',
+    config: finalRunTabConfig,
+    result: result
+  };
+  const saveResultResponse = await fetch('http://localhost:8080/benchmarkresult', {
+    method: 'POST',
+    body: JSON.stringify(saveResultRequest)
+  }).then((res) => res.json());
+  console.log(`saveResultResponse: ${saveResultResponse}`);
+  const resultMetadata: ResultMetadata = {
+    resultId: saveResultResponse.id,
+    timestamp: saveResultResponse.timestamp
+  };
+
+  return { result, resultMetadata };
 });
 
 const dataSlice = createSlice({
@@ -66,7 +84,7 @@ const dataSlice = createSlice({
 
     setParams: (state, action) => {
       state.params = action.payload;
-      console.log(state.params)
+      console.log(state.params);
     },
 
     setValidUserInput: (state, action) => {
@@ -82,18 +100,18 @@ const dataSlice = createSlice({
       const newSession: Session = {
         sessionId: sessionId,
         sessionName: 'New Session',
-        overview: '',             // or some default text
-        createdBy: 'anonymous',   // or actual user
+        overview: '', // or some default text
+        createdBy: 'anonymous', // or actual user
         createdOn: sessionId,
         lastModified: sessionId,
         requests: [],
         servers: [],
         history: []
       };
-      state.datafile.push(newSession)
+      state.datafile.push(newSession);
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
 
     addRequest: (state, action) => {
@@ -104,14 +122,14 @@ const dataSlice = createSlice({
         requestName: 'New Request',
         method: 'GET',
         url: ''
-      }
+      };
       for (let i = 0; i < state.datafile.length; i++) {
         if (state.datafile[i].sessionId === sessionId) {
           state.datafile[i].requests.push(newRequest);
         }
       }
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
 
     duplicateSession: (state, action) => {
@@ -124,7 +142,7 @@ const dataSlice = createSlice({
       state.datafile.push(newSession);
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
 
     deleteSession: (state, action) => {
@@ -136,7 +154,7 @@ const dataSlice = createSlice({
       }
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
 
     renameSession: (state, action) => {
@@ -150,7 +168,7 @@ const dataSlice = createSlice({
       }
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
 
     updateSessionOverview: (state, action) => {
@@ -164,7 +182,7 @@ const dataSlice = createSlice({
       }
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
 
     deleteRequest: (state, action) => {
@@ -183,15 +201,15 @@ const dataSlice = createSlice({
       }
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
-    },
-
+      window.api.writeDataFile(JSON.stringify(state.datafile));
+    }
   },
   // Reducers for asyncthunk
   extraReducers: (builder) => {
     builder.addCase(runTest.fulfilled, (state, action) => {
       console.log(action.payload);
-      state.result = action.payload;
+      state.result = action.payload.result;
+      state.resultMetadata = action.payload.resultMetadata;
     });
   }
 });
