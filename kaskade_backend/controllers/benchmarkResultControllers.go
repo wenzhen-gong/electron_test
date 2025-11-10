@@ -12,7 +12,7 @@ import (
 )
 
 type addBenchmarkResultRequest struct {
-	SessionID string                 `json:"session_id" binding:"required"`
+	SessionID string                 `json:"sessionId" binding:"required"`
 	Version   string                 `json:"version" binding:"required"`
 	Config    map[string]interface{} `json:"config" binding:"required"`
 	Result    map[string]interface{} `json:"result" binding:"required"`

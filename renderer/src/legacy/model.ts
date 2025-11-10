@@ -9,7 +9,7 @@ export interface Result {
 // Result plus some metadata
 export interface ResultMetadata {
   resultId: number;
-  timestamp: number;
+  timestamp: string;
 }
 
 // TODO(jingjing): Clean up later.

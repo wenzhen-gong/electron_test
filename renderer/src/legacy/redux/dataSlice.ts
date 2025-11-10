@@ -36,7 +36,7 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
 
   // Send a fetch request to backend to save result
   const saveResultRequest = {
-    sessionId: state.datafile[0].sessionId,
+    sessionId: state.datafile[0].sessionId.toString(),
     version: '1.0.0',
     config: finalRunTabConfig,
     result: result
