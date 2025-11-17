@@ -6,6 +6,12 @@ export interface Result {
   percentileTimeMs: Record<number, number>;
 }
 
+// Result plus some metadata
+export interface ResultMetadata {
+  resultId: number;
+  timestamp: string;
+}
+
 // TODO(jingjing): Clean up later.
 export interface PercentileStats {
   average: number;
@@ -115,4 +121,5 @@ export interface State {
   contentType: string | null;
   validUserInput: ValidUserInput;
   result?: Result;
+  resultMetadata?: ResultMetadata;
 }
