@@ -10,6 +10,8 @@ export interface Result {
 export interface ResultMetadata {
   resultId: number;
   timestamp: string;
+  sessionId: string;
+  version: string;
 }
 
 // TODO(jingjing): Clean up later.

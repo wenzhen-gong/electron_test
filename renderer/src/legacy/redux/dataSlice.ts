@@ -64,7 +64,9 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
   console.log(`saveResultResponse: ${saveResultResponse}`);
   const resultMetadata: ResultMetadata = {
     resultId: saveResultResponse.id,
-    timestamp: saveResultResponse.timestamp
+    timestamp: saveResultResponse.timestamp,
+    sessionId: saveResultResponse.sessionId,
+    version: saveResultResponse.version
   };
 
   return { result, resultMetadata };
