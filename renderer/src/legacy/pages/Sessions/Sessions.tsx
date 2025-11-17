@@ -5,6 +5,7 @@ import OverviewTab from './tabs/OverviewTab';
 import RunTab from './tabs/RunTab';
 import AuthorizationTab from './tabs/AuthorizationTab';
 import ResultTab from './tabs/ResultTab';
+import HistoryTab from './tabs/HistoryTab';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -84,7 +85,7 @@ const Sessions: React.FC = () => {
   const navigate = useNavigate();
 
   // Tab bar's state that represents the currently selected tab.
-  // 0 = overview, 1 = authorization, 2 = run, 3 = result.
+  // 0 = overview, 1 = authorization, 2 = run, 3 = result, 4 = history.
   const [currentTab, setCurrentTab] = useState<number>(0); // Overview
   const handleTabChange = (event: React.SyntheticEvent, newValue: number): void => {
     setCurrentTab(newValue);
@@ -145,6 +146,7 @@ const Sessions: React.FC = () => {
             <Tab label="Authorization" {...a11yProps(1)} />
             <Tab label="Run" {...a11yProps(2)} />
             <Tab label="Result" {...a11yProps(3)} />
+            <Tab label="History" {...a11yProps(4)} />
           </Tabs>
         </Box>
         <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
@@ -159,6 +161,9 @@ const Sessions: React.FC = () => {
           </CustomTabPanel>
           <CustomTabPanel value={currentTab} index={3}>
             <ResultTab />
+          </CustomTabPanel>
+          <CustomTabPanel value={currentTab} index={4}>
+            <HistoryTab />
           </CustomTabPanel>
         </Box>
       </Box>
