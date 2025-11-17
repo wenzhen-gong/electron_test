@@ -53,3 +53,11 @@ type BenchmarkResult struct {
 	Config    datatypes.JSON `json:"config"`
 	Result    datatypes.JSON `json:"result"`
 }
+
+// BenchmarkResultSummary is used for API responses that only need summary information
+type BenchmarkResultSummary struct {
+	ID        uint      `json:"id"`
+	Timestamp time.Time `json:"timestamp"`
+	SessionID string    `json:"sessionId"`
+	Version   string    `json:"version"`
+}

@@ -51,19 +51,13 @@ func AddBenchmarkResult(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"id":        record.ID,
-		"timestamp": record.Timestamp,
-		"sessionId": record.SessionID,
-		"version":   record.Version,
-	})
-}
-
-type benchmarkResultSummary struct {
-	ID        uint      `json:"id"`
-	Timestamp time.Time `json:"timestamp"`
-	SessionID string    `json:"sessionId"`
-	Version   string    `json:"version"`
+	summary := models.BenchmarkResultSummary{
+		ID:        record.ID,
+		Timestamp: record.Timestamp,
+		SessionID: record.SessionID,
+		Version:   record.Version,
+	}
+	c.JSON(http.StatusCreated, summary)
 }
 
 func GetBenchmarkResults(c *gin.Context, db *gorm.DB) {
@@ -127,9 +121,9 @@ func GetBenchmarkResults(c *gin.Context, db *gorm.DB) {
 	}
 
 	// Convert to summary format
-	summaries := make([]benchmarkResultSummary, len(results))
+	summaries := make([]models.BenchmarkResultSummary, len(results))
 	for i, result := range results {
-		summaries[i] = benchmarkResultSummary{
+		summaries[i] = models.BenchmarkResultSummary{
 			ID:        result.ID,
 			Timestamp: result.Timestamp,
 			SessionID: result.SessionID,
