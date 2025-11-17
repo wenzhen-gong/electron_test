@@ -20,7 +20,9 @@ const initialState: State = {
   signinLoading: false,
   signinFormData: { username: '', password: '' },
   // 这里开始是后端返回的state
-  user: null
+  user: null,
+  // 这里开始是Profile的state
+  openProfile: false
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
@@ -224,6 +226,9 @@ const dataSlice = createSlice({
     },
     setUser:(state, action) => {
       state.user = action.payload;
+    },
+    setOpenProfile: (state, action) => {
+      state.openProfile = action.payload;
     }
   },
   // Reducers for asyncthunk
@@ -259,7 +264,8 @@ export const {
   setOpenSignin,
   setSigninLoading,
   setSigninFormData,
-  setUser
+  setUser,
+  setOpenProfile
 } = dataSlice.actions;
 
 export default dataSlice.reducer;

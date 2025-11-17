@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, JSX } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import OverviewTab from './tabs/OverviewTab';
@@ -20,7 +20,7 @@ interface CustomTabPanelProps {
   value: number;
 }
 
-function CustomTabPanel(props: CustomTabPanelProps) {
+function CustomTabPanel(props: CustomTabPanelProps): JSX.Element {
   const { children, value, index, ...other } = props;
 
   return (

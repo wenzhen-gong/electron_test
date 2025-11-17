@@ -140,4 +140,6 @@ export interface State {
   signinFormData: SigninFormData;
 
   user: User | null;
+
+  openProfile: boolean;
 }
