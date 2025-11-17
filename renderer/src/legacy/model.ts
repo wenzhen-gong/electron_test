@@ -8,7 +8,7 @@ export interface Result {
 
 // Result plus some metadata
 export interface ResultMetadata {
-  resultId: number;
+  id: number;
   timestamp: string;
   sessionId: string;
   version: string;
