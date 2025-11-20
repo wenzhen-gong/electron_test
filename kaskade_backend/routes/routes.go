@@ -33,4 +33,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		controllers.DeleteUser(c, db)
 	})
 	r.POST("/logout", controllers.Logout)
+	r.POST("/benchmarkresult", func(c *gin.Context) {
+		controllers.AddBenchmarkResult(c, db)
+	})
 }

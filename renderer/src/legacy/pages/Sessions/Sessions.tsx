@@ -20,23 +20,35 @@ interface CustomTabPanelProps {
   value: number;
 }
 
-function CustomTabPanel(props: CustomTabPanelProps): JSX.Element {
+function CustomTabPanel(props: CustomTabPanelProps): React.ReactElement {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
+    <Box
       role="tabpanel"
       hidden={value !== index}
       id={`session-tabpanel-${index}`}
       aria-labelledby={`session-tab-${index}`}
       {...other}
+      sx={{ height: '100%', overflow: 'hidden', display: value === index ? 'block' : 'none' }}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
+      <Box
+        sx={{
+          p: 3,
+          height: '100%',
+          boxSizing: 'border-box',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
   );
 }
 
-function a11yProps(index: number) {
+function a11yProps(index: number): { id: string; 'aria-controls': string } {
   return {
     id: `session-tab-${index}`,
     'aria-controls': `session-tabpanel-${index}`
@@ -46,6 +58,10 @@ function a11yProps(index: number) {
 // Create styled components outside render functions to avoid recreating new components for each re-render.
 const SessionsDiv = styled.div`
   padding: 50px;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Sessions: React.FC = () => {
@@ -89,7 +105,7 @@ const Sessions: React.FC = () => {
       <Box
         sx={{
           display: 'flex',
-          flexDirectin: 'row',
+          flexDirection: 'row',
           alignItems: 'center',
           marginBottom: '20px',
           paddingBottom: '20px',
@@ -109,8 +125,16 @@ const Sessions: React.FC = () => {
           {sessionName}
         </Typography>
       </Box>
-      <Box sx={{ width: '100%' }}>
-        <Box sx={{ width: '70%' }}>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          overflow: 'hidden'
+        }}
+      >
+        <Box sx={{ width: '70%', minWidth: 300 }}>
           <Tabs
             value={currentTab}
             onChange={handleTabChange}
@@ -123,18 +147,20 @@ const Sessions: React.FC = () => {
             <Tab label="Result" {...a11yProps(3)} />
           </Tabs>
         </Box>
-        <CustomTabPanel value={currentTab} index={0}>
-          <OverviewTab setCurrentTab={setCurrentTab} />
-        </CustomTabPanel>
-        <CustomTabPanel value={currentTab} index={1}>
-          <AuthorizationTab />
-        </CustomTabPanel>
-        <CustomTabPanel value={currentTab} index={2}>
-          <RunTab setCurrentTab={setCurrentTab} />
-        </CustomTabPanel>
-        <CustomTabPanel value={currentTab} index={3}>
-          <ResultTab />
-        </CustomTabPanel>
+        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <CustomTabPanel value={currentTab} index={0}>
+            <OverviewTab setCurrentTab={setCurrentTab} />
+          </CustomTabPanel>
+          <CustomTabPanel value={currentTab} index={1}>
+            <AuthorizationTab />
+          </CustomTabPanel>
+          <CustomTabPanel value={currentTab} index={2}>
+            <RunTab setCurrentTab={setCurrentTab} />
+          </CustomTabPanel>
+          <CustomTabPanel value={currentTab} index={3}>
+            <ResultTab />
+          </CustomTabPanel>
+        </Box>
       </Box>
     </SessionsDiv>
   );
