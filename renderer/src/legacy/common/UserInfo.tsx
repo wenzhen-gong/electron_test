@@ -18,7 +18,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { User } from '../model';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { setOpenProfile } from '../redux/dataSlice';
+import { setOpenProfile, setUser } from '../redux/dataSlice';
 import store from '../redux/store';
 
 const UserInfo: React.FC<User> = ({ username, email }) => {
@@ -38,7 +38,7 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement | null>(null);
   const emailInputRef = useRef<HTMLInputElement | null>(null);
-
+  const [changeInfoError, setChangeInfoError] = useState('');
   // useEffect(() => {
   //   // if (!isUsernameEditable) {
   //   //   setProfileForm((prev) => ({
@@ -56,6 +56,9 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
     store.dispatch(setOpenProfile(false));
     setIsUsernameEditable(false);
     setIsEmailEditable(false);
+    setChangeInfoError('');
+    setModifyPassword(false);
+    setProfileForm((prev) => ({ ...prev, newpassword: '', retypenewpassword: '' }));
   };
 
   const handleModifyPassword = (): void => {
@@ -89,10 +92,10 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
     setSubmitLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:8080/users/${username}`, {
+      const response = await fetch(`http://localhost:8080/users/${user?.username}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(profileForm),
         credentials: 'include'
@@ -104,11 +107,18 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
         throw new Error(result.error || 'Modify User failed');
       }
 
-      // 修改用户信息成功
-      console.log(result);
+      // 修改用户信息成功，更新 Redux store 中的 user
+      if (user) {
+        store.dispatch(
+          setUser({
+            username: profileForm.username,
+            email: profileForm.email
+          })
+        );
+      }
       handleCloseProfile();
     } catch (err) {
-      console.log(err);
+      setChangeInfoError(err instanceof Error ? err.message : 'Modify User failed, retry');
     } finally {
       setSubmitLoading(false);
     }
@@ -132,6 +142,7 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
         <DialogTitle>User Profile</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
+            {changeInfoError && <Alert severity="error">{changeInfoError}</Alert>}
             <Stack direction="row" spacing={1} alignItems="center">
               <TextField
                 name="username"

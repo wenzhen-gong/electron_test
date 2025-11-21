@@ -116,13 +116,12 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	if updatedData.Username != "" {
 		existingUser.Username = updatedData.Username
 	}
-	if updatedData.CurrentPassword != "" {
+	if updatedData.CurrentPassword != "" && updatedData.NewPassword != "" {
 		if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(updatedData.CurrentPassword)); err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Current password is wrong"})
 			return
 		}
-	}
-	if updatedData.NewPassword != "" {
+
 		hashed, err := bcrypt.GenerateFromPassword([]byte(updatedData.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
