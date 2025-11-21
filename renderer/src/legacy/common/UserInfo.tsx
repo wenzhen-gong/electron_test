@@ -88,8 +88,26 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
     setTimeout(() => emailInputRef.current?.focus(), 0);
   };
 
-  const handleLogOut = (): void => {
-    store.dispatch(setUser(null));
+  const handleLogOut = async (): Promise<void> => {
+    try {
+      const response = await fetch('http://localhost:8080/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Log out failed');
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      store.dispatch(setUser(null));
+    }
   };
 
   const handleSubmit = async (): Promise<void> => {
