@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { Request, Session, State, Result, ResultMetadata } from '../model'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { Request, Session, State, Result, ResultMetadata } from '../model';
 
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
@@ -21,6 +21,8 @@ const initialState: State = {
   signinFormData: { username: '', password: '' },
   // 这里开始是后端返回的state
   user: null,
+  // only for testing
+  // user: { username: 'wzg', email: 'wzg@email.com' },
   // 这里开始是Profile的state
   openProfile: false
 };
@@ -215,7 +217,7 @@ const dataSlice = createSlice({
       }
 
       // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile))
+      window.api.writeDataFile(JSON.stringify(state.datafile));
     },
     setSignupError: (state, action) => {
       state.signupError = action.payload;
@@ -242,7 +244,7 @@ const dataSlice = createSlice({
     setSigninFormData: (state, action) => {
       state.signinFormData = action.payload;
     },
-    setUser:(state, action) => {
+    setUser: (state, action) => {
       state.user = action.payload;
     },
     setOpenProfile: (state, action) => {

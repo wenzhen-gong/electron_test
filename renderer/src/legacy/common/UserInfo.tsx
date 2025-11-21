@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -20,25 +21,32 @@ import { RootState } from '../redux/store';
 import { setOpenProfile } from '../redux/dataSlice';
 import store from '../redux/store';
 
-const UserInfo: React.FC<User> = ({ username }) => {
+const UserInfo: React.FC<User> = ({ username, email }) => {
   const user = useSelector((state: RootState) => state.user);
   const openProfile = useSelector((state: RootState) => state.openProfile);
 
   const [profileForm, setProfileForm] = useState({
     username: user?.username ?? username ?? '',
-    password: ''
+    email: user?.email ?? email ?? '',
+    currentpassword: '',
+    newpassword: '',
+    retypenewpassword: ''
   });
   const [isUsernameEditable, setIsUsernameEditable] = useState(false);
+  const [isEmailEditable, setIsEmailEditable] = useState(false);
+  const [modifyPassword, setModifyPassword] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    if (!isUsernameEditable) {
-      setProfileForm((prev) => ({
-        ...prev,
-        username: user?.username ?? username ?? ''
-      }));
-    }
-  }, [user, username, isUsernameEditable]);
+  // useEffect(() => {
+  //   // if (!isUsernameEditable) {
+  //   //   setProfileForm((prev) => ({
+  //   //     ...prev,
+  //   //     username: user?.username ?? username ?? ''
+  //   //   }));
+  //   // }
+  // }, [user, username, isUsernameEditable]);
 
   const handleOpenProfile = (): void => {
     store.dispatch(setOpenProfile(true));
@@ -47,6 +55,17 @@ const UserInfo: React.FC<User> = ({ username }) => {
   const handleCloseProfile = (): void => {
     store.dispatch(setOpenProfile(false));
     setIsUsernameEditable(false);
+    setIsEmailEditable(false);
+  };
+
+  const handleModifyPassword = (): void => {
+    setModifyPassword((prev) => !prev);
+    setProfileForm((prev) => ({
+      ...prev,
+      currentpassword: '',
+      newpassword: '',
+      retypenewpassword: ''
+    }));
   };
 
   const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -60,6 +79,39 @@ const UserInfo: React.FC<User> = ({ username }) => {
   const toggleUsernameEditable = (): void => {
     setIsUsernameEditable((prev) => !prev);
     setTimeout(() => usernameInputRef.current?.focus(), 0);
+  };
+  const toggleEmailEditable = (): void => {
+    setIsEmailEditable((prev) => !prev);
+    setTimeout(() => emailInputRef.current?.focus(), 0);
+  };
+
+  const handleSubmit = async (): Promise<void> => {
+    setSubmitLoading(true);
+
+    try {
+      const response = await fetch(`http://localhost:8080/users/${username}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileForm),
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Modify User failed');
+      }
+
+      // 修改用户信息成功
+      console.log(result);
+      handleCloseProfile();
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   return (
@@ -104,17 +156,85 @@ const UserInfo: React.FC<User> = ({ username }) => {
                 </IconButton>
               </Tooltip>
             </Stack>
-            <TextField
-              name="password"
-              label="Password"
-              type="password"
-              fullWidth
-              value={profileForm.password}
-              onChange={handleProfileInputChange}
-            />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <TextField
+                name="email"
+                label="Email"
+                fullWidth
+                value={profileForm.email}
+                onChange={handleProfileInputChange}
+                disabled={!isEmailEditable}
+                inputRef={emailInputRef}
+              />
+              <Tooltip title={isEmailEditable ? '锁定' : '编辑'}>
+                <IconButton
+                  color={isEmailEditable ? 'success' : 'default'}
+                  onClick={toggleEmailEditable}
+                  size="small"
+                >
+                  {isEmailEditable ? <CheckIcon fontSize="small" /> : <EditIcon fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+            </Stack>
+            {modifyPassword ? (
+              <>
+                <TextField
+                  name="currentpassword"
+                  label="Current Password"
+                  type="password"
+                  fullWidth
+                  value={profileForm.currentpassword}
+                  onChange={handleProfileInputChange}
+                />
+                <TextField
+                  name="newpassword"
+                  label="New Password"
+                  type="password"
+                  fullWidth
+                  value={profileForm.newpassword}
+                  onChange={handleProfileInputChange}
+                />
+                <TextField
+                  name="retypenewpassword"
+                  label="Retype New Password"
+                  type="password"
+                  fullWidth
+                  value={profileForm.retypenewpassword}
+                  onChange={handleProfileInputChange}
+                />
+                {profileForm.newpassword !== profileForm.retypenewpassword && (
+                  <Alert severity="error">Password Mismatch</Alert>
+                )}
+
+                <Link
+                  component="button"
+                  type="button"
+                  variant="body1"
+                  underline="hover"
+                  onClick={handleModifyPassword}
+                  sx={{ p: 0, alignSelf: 'center' }}
+                >
+                  Close
+                </Link>
+              </>
+            ) : (
+              <Link
+                component="button"
+                type="button"
+                variant="body1"
+                underline="hover"
+                onClick={handleModifyPassword}
+                sx={{ p: 0, alignSelf: 'center' }}
+              >
+                Modify Password
+              </Link>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleSubmit} variant="contained" disabled={submitLoading}>
+            {submitLoading ? 'Submitting...' : 'Submit'}
+          </Button>
           <Button onClick={handleCloseProfile}>Cancel</Button>
         </DialogActions>
       </Dialog>

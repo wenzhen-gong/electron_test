@@ -97,8 +97,7 @@ const HeadBar: React.FC = () => {
           onChange={handleSelect}
         />
       </SearchDiv>
-      {user && <UserInfo username={user.username} email={user.email} />}
-      {!user && <SignInSignUp />}
+      {user ? <UserInfo username={user.username} email={user.email} /> : <SignInSignUp />}
     </HeadBarContainer>
   );
 };

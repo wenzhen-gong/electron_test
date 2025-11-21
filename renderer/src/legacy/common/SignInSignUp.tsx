@@ -109,7 +109,8 @@ const SignInSignUp: React.FC = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(signinFormData)
+        body: JSON.stringify(signinFormData),
+        credentials: 'include'
       });
 
       const result = await response.json();

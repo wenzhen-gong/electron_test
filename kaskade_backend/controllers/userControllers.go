@@ -98,9 +98,10 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	var updatedData struct {
-		Email    string `json:"email"`
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Email           string `json:"email"`
+		Username        string `json:"username"`
+		CurrentPassword string `json:"currentpassword"`
+		NewPassword     string `json:"newpassword"`
 	}
 
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
@@ -115,8 +116,14 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	if updatedData.Username != "" {
 		existingUser.Username = updatedData.Username
 	}
-	if updatedData.Password != "" {
-		hashed, err := bcrypt.GenerateFromPassword([]byte(updatedData.Password), bcrypt.DefaultCost)
+	if updatedData.CurrentPassword != "" {
+		if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(updatedData.CurrentPassword)); err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
+			return
+		}
+	}
+	if updatedData.NewPassword != "" {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(updatedData.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 			return
