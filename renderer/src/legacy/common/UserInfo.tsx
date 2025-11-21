@@ -88,6 +88,10 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
     setTimeout(() => emailInputRef.current?.focus(), 0);
   };
 
+  const handleLogOut = (): void => {
+    store.dispatch(setUser(null));
+  };
+
   const handleSubmit = async (): Promise<void> => {
     setSubmitLoading(true);
 
@@ -136,6 +140,16 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
         sx={{ p: 0, alignSelf: 'center' }}
       >
         Profile
+      </Link>
+      <Link
+        component="button"
+        type="button"
+        variant="body1"
+        underline="hover"
+        onClick={handleLogOut}
+        sx={{ p: 0, alignSelf: 'center' }}
+      >
+        Log Out
       </Link>
 
       <Dialog open={openProfile} onClose={handleCloseProfile} maxWidth="sm" fullWidth>
