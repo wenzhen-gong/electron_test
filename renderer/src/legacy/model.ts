@@ -105,11 +105,25 @@ export interface Param {
   key: string;
   value: string;
 }
+export interface SignupFormData {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface SigninFormData {
+  username: string;
+  password: string;
+}
 
 export interface ValidUserInput {
   valid: boolean;
   flag: boolean;
   error: string | null;
+}
+export interface User {
+  username: string;
+  email: string;
 }
 
 export interface State {
@@ -121,5 +135,18 @@ export interface State {
   contentType: string | null;
   validUserInput: ValidUserInput;
   result?: Result;
+  signupError: string | null;
+  openSignup: boolean;
+  signupLoading: boolean;
+  signupFormData: SignupFormData;
+
+  signinError: string | null;
+  openSignin: boolean;
+  signinLoading: boolean;
+  signinFormData: SigninFormData;
+
+  user: User | null;
+
+  openProfile: boolean;
   resultMetadata?: ResultMetadata;
 }

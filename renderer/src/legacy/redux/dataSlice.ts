@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { Request, Session, State, Result, ResultMetadata } from '../model'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { Request, Session, State, Result, ResultMetadata } from '../model';
 
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
@@ -8,7 +8,23 @@ const initialState: State = {
   params: [],
   contentType: null,
   validUserInput: { valid: false, flag: false, error: null },
-  result: undefined
+  result: undefined,
+  // 这里开始是signup signin的model里面的state
+  signupError: null,
+  openSignup: false,
+  signupLoading: false,
+  signupFormData: { username: '', email: '', password: '' },
+
+  signinError: null,
+  openSignin: false,
+  signinLoading: false,
+  signinFormData: { username: '', password: '' },
+  // 这里开始是后端返回的state
+  user: null,
+  // only for testing
+  // user: { username: 'wzg', email: 'wzg@email.com' },
+  // 这里开始是Profile的state
+  openProfile: false
 };
 
 export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
@@ -202,6 +218,37 @@ const dataSlice = createSlice({
 
       // call main process to write data file
       window.api.writeDataFile(JSON.stringify(state.datafile));
+    },
+    setSignupError: (state, action) => {
+      state.signupError = action.payload;
+    },
+    setOpenSignup: (state, action) => {
+      state.openSignup = action.payload;
+    },
+    setSignupLoading: (state, action) => {
+      state.signupLoading = action.payload;
+    },
+    setSignupFormData: (state, action) => {
+      state.signupFormData = action.payload;
+    },
+
+    setSigninError: (state, action) => {
+      state.signinError = action.payload;
+    },
+    setOpenSignin: (state, action) => {
+      state.openSignin = action.payload;
+    },
+    setSigninLoading: (state, action) => {
+      state.signinLoading = action.payload;
+    },
+    setSigninFormData: (state, action) => {
+      state.signinFormData = action.payload;
+    },
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
+    setOpenProfile: (state, action) => {
+      state.openProfile = action.payload;
     }
   },
   // Reducers for asyncthunk
@@ -229,7 +276,17 @@ export const {
   deleteSession,
   renameSession,
   updateSessionOverview,
-  deleteRequest
+  deleteRequest,
+  setSignupError,
+  setOpenSignup,
+  setSignupLoading,
+  setSignupFormData,
+  setSigninError,
+  setOpenSignin,
+  setSigninLoading,
+  setSigninFormData,
+  setUser,
+  setOpenProfile
 } = dataSlice.actions;
 
 export default dataSlice.reducer;

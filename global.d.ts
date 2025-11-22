@@ -1,14 +1,12 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
+import { ElectronAPI } from '@electron-toolkit/preload';
 
 declare global {
   interface Window {
-    electron: ElectronAPI
+    electron: ElectronAPI;
     api: {
-      runLoadTest: (config: any) => Promise<any>
-      readDataFile: () => unknown
-      writeDataFile: (data:string) => unknown
-    }
+      runLoadTest: (config: any) => Promise<any>;
+      readDataFile: () => unknown;
+      writeDataFile: (data: string) => unknown;
+    };
   }
 }
-
-

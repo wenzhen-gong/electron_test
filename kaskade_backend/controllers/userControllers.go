@@ -29,13 +29,13 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var user models.User
-	// 查找是否已存在user
-	if db.Where("username = ?", req.Username).Find(&user).RowsAffected != 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "username exists"})
+	var existingUser models.User
+	if err := db.Where("username = ?", req.Username).First(&existingUser).Error; err == nil {
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": "username exists"})
 		return
-	} else if db.Where("email = ?", req.Email).Find(&user).RowsAffected != 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "email exists"})
+	}
+	if err := db.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": "email exists"})
 		return
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -43,7 +43,7 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
-	user = models.User{
+	user := models.User{
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
@@ -62,18 +62,17 @@ func Login(c *gin.Context, db *gorm.DB) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request body: " + err.Error()})
 		return
 	}
-	result := db.Where("username = ?", req.Username).Find(&foundUser)
-	if result.RowsAffected == 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "username does not exist"})
+	result := db.Where("username = ?", req.Username).First(&foundUser)
+	if result.Error != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "username does not exist"})
 		return
-	} else {
-		if err := bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(req.Password)); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Wrong password"})
-			return
-		}
-		c.Set("user", foundUser)
-		c.Next()
 	}
+	if err := bcrypt.CompareHashAndPassword([]byte(foundUser.PasswordHash), []byte(req.Password)); err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
+		return
+	}
+	c.Set("user", foundUser)
+	c.Next()
 }
 func Logout(c *gin.Context) {
 	c.SetCookie("jwt", "", -1, "/", "localhost", true, true)
@@ -99,9 +98,10 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	var updatedData struct {
-		Email    string `json:"email"`
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Email           string `json:"email"`
+		Username        string `json:"username"`
+		CurrentPassword string `json:"currentpassword"`
+		NewPassword     string `json:"newpassword"`
 	}
 
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
@@ -116,8 +116,17 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	if updatedData.Username != "" {
 		existingUser.Username = updatedData.Username
 	}
-	if updatedData.Password != "" {
-		hashed, _ := bcrypt.GenerateFromPassword([]byte(updatedData.Password), bcrypt.DefaultCost)
+	if updatedData.CurrentPassword != "" && updatedData.NewPassword != "" {
+		if err := bcrypt.CompareHashAndPassword([]byte(existingUser.PasswordHash), []byte(updatedData.CurrentPassword)); err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Current password is wrong"})
+			return
+		}
+
+		hashed, err := bcrypt.GenerateFromPassword([]byte(updatedData.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+			return
+		}
 		existingUser.PasswordHash = string(hashed)
 	}
 

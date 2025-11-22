@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import store from '../../../redux/store';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   setValidUserInput,
   setRunTabData,
@@ -87,7 +87,11 @@ const RunTab: React.FC<RunTabProps> = (props) => {
     store.dispatch(setRunTabData(config));
   };
 
-  const handleHeaderChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Header, index: number): void => {
+  const handleHeaderChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof Header,
+    index: number
+  ): void => {
     const updated = [...headers];
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setHeaders(updated));
@@ -108,8 +112,8 @@ const RunTab: React.FC<RunTabProps> = (props) => {
         param.value.indexOf('&') === -1
           ? param.value
           : param.value.slice(0, param.value.indexOf('&')) +
-          '%26' +
-          param.value.slice(param.value.indexOf('&') + 1, param.value.length);
+            '%26' +
+            param.value.slice(param.value.indexOf('&') + 1, param.value.length);
       suffix += param.key + '=' + value + '&';
     });
     let updatedURL = runTabConfig.URL;
@@ -122,7 +126,11 @@ const RunTab: React.FC<RunTabProps> = (props) => {
     store.dispatch(setRunTabData(updatedRunTabConfig));
   };
 
-  const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Param, index: number): void => {
+  const handleParamChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof Param,
+    index: number
+  ): void => {
     const updated = [...params];
     updated[index] = { ...updated[index], [field]: e.target.value };
     store.dispatch(setParams(updated));
@@ -319,9 +327,9 @@ const RunTab: React.FC<RunTabProps> = (props) => {
         </Typography>
         <Box
           sx={{
-            maxHeight: 200,         // 限制最大高度
-            overflowY: "auto",      // 超过时出现垂直滚动条
-            pr: 1,                  // 给滚动条留点内边距，不会挡住输入框
+            maxHeight: 200, // 限制最大高度
+            overflowY: 'auto', // 超过时出现垂直滚动条
+            pr: 1 // 给滚动条留点内边距，不会挡住输入框
           }}
         >
           {headers.map((header, index) => (
@@ -362,8 +370,8 @@ const RunTab: React.FC<RunTabProps> = (props) => {
         <Box
           sx={{
             maxHeight: 200,
-            overflowY: "auto",
-            pr: 1,
+            overflowY: 'auto',
+            pr: 1
           }}
         >
           {params.map((param, index) => (
@@ -434,7 +442,7 @@ const RunTab: React.FC<RunTabProps> = (props) => {
           </Select>
         </FormControl>
       </Box>
-    </Box >
+    </Box>
   );
 };
 
