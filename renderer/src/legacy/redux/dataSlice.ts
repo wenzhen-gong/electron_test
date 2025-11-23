@@ -27,7 +27,7 @@ const initialState: State = {
   openProfile: false
 };
 
-export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) => {
+export const runTest = createAsyncThunk('datafile/runTest', async (sessionId: string, thunkAPI) => {
   const state = thunkAPI.getState() as State;
   // console.log('config in runTest Thunk: ', state.runTabConfig);
   // console.log('contentType in runTest Thunk: ', state.contentType);
@@ -52,7 +52,7 @@ export const runTest = createAsyncThunk('datafile/runTest', async (_, thunkAPI) 
 
   // Send a fetch request to backend to save result
   const saveResultRequest = {
-    sessionId: state.datafile[0].sessionId.toString(),
+    sessionId: sessionId,
     version: '1.0.0',
     config: finalRunTabConfig,
     result: result
