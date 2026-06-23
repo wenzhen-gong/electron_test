@@ -4,7 +4,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import fs from 'fs';
 
-let mainWindow: BrowserWindow;
+let mainWindow: BrowserWindow | null = null;
 
 // 获取数据文件路径（存储在用户数据目录，可写）
 function getDataFilePath(): string {
@@ -46,10 +46,7 @@ function initializeDataFile(): void {
   }
 }
 
-app.whenReady().then(() => {
-  // 初始化数据文件
-  initializeDataFile();
-
+function createWindow(): void {
   const isDev = !app.isPackaged;
 
   mainWindow = new BrowserWindow({
@@ -60,6 +57,10 @@ app.whenReady().then(() => {
       nodeIntegration: false,
       contextIsolation: true
     }
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 
   if (isDev) {
@@ -74,7 +75,7 @@ app.whenReady().then(() => {
     // 监听页面加载失败事件（仅用于错误诊断）
     mainWindow.webContents.on(
       'did-fail-load',
-      (event, errorCode, errorDescription, validatedURL) => {
+      (_event, errorCode, errorDescription, validatedURL) => {
         console.error('Page failed to load:', errorCode, errorDescription, validatedURL);
       }
     );
@@ -82,6 +83,27 @@ app.whenReady().then(() => {
     mainWindow.loadFile(htmlPath).catch((err) => {
       console.error('Failed to load HTML file:', err);
     });
+  }
+}
+
+app.whenReady().then(() => {
+  // 初始化数据文件
+  initializeDataFile();
+
+  createWindow();
+
+  // macOS：点击 Dock 图标且没有窗口时，重新创建窗口
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+// 关闭所有窗口时退出应用（macOS 除外，遵循平台惯例）
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
 });
 
@@ -117,13 +139,28 @@ ipcMain.handle('run-load-test', async (_event, config) => {
     }
     console.log('Spawning loadtester from:', loadtesterPath);
     const child = spawn(loadtesterPath);
+
+    // 如果二进制无法启动（权限不足、架构不符等），close 不会触发，
+    // 必须监听 error 以避免 Promise 永久挂起
+    child.on('error', (err) => {
+      console.error('Failed to spawn loadtester:', err);
+      reject(err);
+    });
+
+    child.stdin.on('error', (err) => {
+      console.error('Failed to write to loadtester stdin:', err);
+    });
     child.stdin.write(JSON.stringify(config));
     child.stdin.end();
 
     let output = '';
     child.stdout.on('data', (data) => (output += data));
     child.stderr.on('data', (data) => console.error(data.toString()));
-    child.on('close', () => {
+    child.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`loadtester exited with code ${code}`));
+        return;
+      }
       try {
         const result = JSON.parse(output);
         resolve(result);

@@ -31,27 +31,28 @@ interface LayoutProps {
   page: string;
 }
 
+// The overall page layout.
+// 定义在 App 外部，避免每次 App 重渲染都重建组件、导致子树卸载重挂。
+const Layout: React.FC<LayoutProps> = (props) => {
+  //没有地址栏，但是可以用useLocation追踪当前url
+  const location = useLocation();
+  console.log('Current URL:', location.pathname);
+
+  return (
+    <PageContainer>
+      <HeadBar />
+      <MainContainer>
+        <NavBar page={props.page} />
+        <SideBar page={props.page} />
+        <OutletContainer>
+          <Outlet />
+        </OutletContainer>
+      </MainContainer>
+    </PageContainer>
+  );
+};
+
 const App: React.FC = () => {
-  // The overall page layout.
-  const Layout: React.FC<LayoutProps> = (props) => {
-    //没有地址栏，但是可以用useLocation追踪当前url
-    const location = useLocation();
-    console.log('Current URL:', location.pathname);
-
-    return (
-      <PageContainer>
-        <HeadBar />
-        <MainContainer>
-          <NavBar page={props.page} />
-          <SideBar page={props.page} />
-          <OutletContainer>
-            <Outlet />
-          </OutletContainer>
-        </MainContainer>
-      </PageContainer>
-    );
-  };
-
   // Define react router rules.
   // Note that request page is nested in session page, so session page component
   // will not unmount when navigating to a request page.
