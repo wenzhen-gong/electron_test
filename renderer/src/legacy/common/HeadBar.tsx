@@ -3,100 +3,94 @@ import styled from 'styled-components';
 import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
 import Autocomplete from '@mui/material/Autocomplete';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
 import { useNavigate } from 'react-router-dom';
 import SignInSignUp from './SignInSignUp';
 import type { RootState } from '../redux/store';
 import UserInfo from './UserInfo';
+import { palette } from '../theme';
 
 const HeadBarContainer = styled.div`
-  background-color: #1e1e1e;
-  color: #ffffff;
+  background-color: ${palette.surface};
+  color: ${palette.text};
   height: 60px;
-  border-bottom-style: solid;
-  border-bottom-color: #535353;
-  border-bottom-with: 2px;
+  border-bottom: 1px solid ${palette.border};
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 0 20px;
+  gap: 24px;
+  padding: 0 24px;
 `;
 
 const LogoDiv = styled.div`
   display: flex;
-  width: 231px;
-  height: 49px;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   flex-shrink: 0;
-  color: #71aaff;
-  text-align: center;
+  color: ${palette.accent};
   font-family: 'Fredoka', sans-serif;
-  font-size: 25px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
 `;
 
-const SearchDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-`;
+// 搜索项：用一个结构体一起携带显示文本与目标 URL，避免之前两个并行数组
+// (allValues / allURLs) 靠下标对应、且重名时跳转到错误项的问题。
+interface SearchOption {
+  label: string;
+  url: string;
+}
 
 const HeadBar: React.FC = () => {
   const navigate = useNavigate();
 
-  // Get all sessions from data file.
   const allSessions = useSelector((state: RootState) => state.datafile);
+  const user = useSelector((state: RootState) => state.user);
 
-  // Prepare all search values for the autocomplete search bar.
-  const allValues: string[] = [];
-  // For each value in "allValues", generate its corresponding redirect URL.
-  const allURLs: string[] = [];
-  for (let i = 0; i < allSessions.length; i++) {
-    // The session itself.
-    allValues.push(allSessions[i].sessionName);
-    allURLs.push('/sessions/' + allSessions[i].sessionId);
-
-    // All requests in this session.
-    for (let j = 0; j < allSessions[i].requests.length; j++) {
-      allValues.push(
-        allSessions[i].sessionName + '  >>  ' + allSessions[i].requests[j].requestName
-      );
-      allURLs.push(
-        '/sessions/' + allSessions[i].sessionId + '/' + allSessions[i].requests[j].requestId
-      );
+  const options: SearchOption[] = [];
+  for (const session of allSessions) {
+    options.push({ label: session.sessionName, url: `/sessions/${session.sessionId}` });
+    for (const request of session.requests) {
+      options.push({
+        label: `${session.sessionName}  ›  ${request.requestName}`,
+        url: `/sessions/${session.sessionId}/${request.requestId}`
+      });
     }
   }
 
-  const handleSelect = (e: SyntheticEvent, newValue: string | null): void => {
-    console.log('Selection is: ', newValue);
-    for (let i = 0; i < allValues.length; ++i) {
-      if (allValues[i] === newValue) {
-        console.log("Selection's Id is: ", i);
-        console.log("Selection's URL is: ", allURLs[i]);
-        navigate(allURLs[i]);
-      }
+  const handleSelect = (_e: SyntheticEvent, newValue: SearchOption | null): void => {
+    if (newValue) {
+      navigate(newValue.url);
     }
   };
 
-  const user = useSelector((state: RootState) => state.user);
   return (
     <HeadBarContainer>
       <LogoDiv>KASKADE</LogoDiv>
-      <SearchDiv>
-        <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={allValues}
-          sx={{ width: 300 }}
-          renderInput={(params) => <TextField {...params} label="Search Kaskade" />}
-          onChange={handleSelect}
-        />
-      </SearchDiv>
+      <Autocomplete
+        disablePortal
+        options={options}
+        getOptionLabel={(option) => option.label}
+        isOptionEqualToValue={(a, b) => a.url === b.url}
+        sx={{ width: 320 }}
+        size="small"
+        onChange={handleSelect}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Search Kaskade"
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" sx={{ color: palette.textSecondary }} />
+                </InputAdornment>
+              )
+            }}
+          />
+        )}
+      />
       {user ? <UserInfo username={user.username} email={user.email} /> : <SignInSignUp />}
     </HeadBarContainer>
   );

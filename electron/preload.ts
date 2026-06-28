@@ -1,12 +1,12 @@
 // electron/preload.ts
 import { contextBridge, ipcRenderer } from 'electron';
-console.log('✅ Preload script loaded');
-console.log('window.api =', window.api);
 
-contextBridge.exposeInMainWorld('api', {
+const api: KaskadeApi = {
   readDataFile: () => ipcRenderer.invoke('read-data-file'),
   writeDataFile: (content: string) => {
-    return ipcRenderer.send('write-data-file', content);
+    ipcRenderer.send('write-data-file', content);
   },
-  runLoadTest: (config: any) => ipcRenderer.invoke('run-load-test', config)
-});
+  runLoadTest: (config: LoadTestConfig) => ipcRenderer.invoke('run-load-test', config)
+};
+
+contextBridge.exposeInMainWorld('api', api);

@@ -18,61 +18,17 @@ import Paper from '@mui/material/Paper';
 import { ResultMetadata, Result } from '../../../model';
 import { setResult } from '../../../redux/dataSlice';
 import { RootState } from '../../../redux/store';
+import { apiUrl } from '../../../config';
+import {
+  getSuccessRatioColor,
+  getP50LatencyColor,
+  getP95LatencyColor
+} from '../../../common/resultMetrics';
 
 interface HistoryTabProps {
   setCurrentTab?: (tab: number) => void;
   currentTab?: number;
 }
-
-// Color thresholds for metrics
-const SUCCESS_RATIO_THRESHOLDS = {
-  EXCELLENT: 98, // >= 98%: green
-  GOOD: 95, // >= 95%: blue
-  WARNING: 80 // >= 80%: yellow, < 80%: red
-};
-
-const P50_LATENCY_THRESHOLDS = {
-  EXCELLENT: 100, // <= 100ms: green
-  GOOD: 200, // <= 200ms: blue
-  WARNING: 500 // <= 500ms: yellow, > 500ms: red
-};
-
-const P95_LATENCY_THRESHOLDS = {
-  EXCELLENT: 500, // <= 500ms: green
-  GOOD: 1000, // <= 1000ms: blue
-  WARNING: 2000 // <= 2000ms: yellow, > 2000ms: red
-};
-
-// Helper functions to get chip color based on value
-const getSuccessRatioColor = (
-  value: number
-): 'success' | 'primary' | 'warning' | 'error' | 'default' => {
-  if (value < 0) return 'default';
-  if (value >= SUCCESS_RATIO_THRESHOLDS.EXCELLENT) return 'success';
-  if (value >= SUCCESS_RATIO_THRESHOLDS.GOOD) return 'primary';
-  if (value >= SUCCESS_RATIO_THRESHOLDS.WARNING) return 'warning';
-  return 'error';
-};
-
-const getP50LatencyColor = (
-  value: number
-): 'success' | 'primary' | 'warning' | 'error' | 'default' => {
-  if (value < 0) return 'default';
-  if (value <= P50_LATENCY_THRESHOLDS.EXCELLENT) return 'success';
-  if (value <= P50_LATENCY_THRESHOLDS.GOOD) return 'primary';
-  if (value <= P50_LATENCY_THRESHOLDS.WARNING) return 'warning';
-  return 'error';
-};
-
-const getP95LatencyColor = (
-  value: number
-): 'success' | 'primary' | 'warning' | 'error' | 'default' => {
-  if (value < 0) return 'default';
-  if (value <= P95_LATENCY_THRESHOLDS.EXCELLENT) return 'success';
-  if (value <= P95_LATENCY_THRESHOLDS.GOOD) return 'primary';
-  if (value <= P95_LATENCY_THRESHOLDS.WARNING) return 'warning';
-  return 'error';
-};
 
 const HistoryTab: React.FC<HistoryTabProps> = ({ setCurrentTab, currentTab }) => {
   const params = useParams();
@@ -102,7 +58,8 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ setCurrentTab, currentTab }) =>
     try {
       const limit = 20; // Show last 20 results
       const response = await fetch(
-        `https://kaskade-backend-483052428154.asia-east1.run.app/benchmarkresult?userId=${user.id}&sessionId=${sessionId}&limit=${limit}`
+        apiUrl(`/benchmarkresult?userId=${user.id}&sessionId=${sessionId}&limit=${limit}`),
+        { credentials: 'include' }
       );
 
       if (!response.ok) {
@@ -133,7 +90,9 @@ const HistoryTab: React.FC<HistoryTabProps> = ({ setCurrentTab, currentTab }) =>
 
   const handleRowClick = async (resultId: number): Promise<void> => {
     try {
-      const response = await fetch(`https://kaskade-backend-483052428154.asia-east1.run.app/benchmarkresult/${resultId}`);
+      const response = await fetch(apiUrl(`/benchmarkresult/${resultId}`), {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch benchmark result details');
       }

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { renameSession, updateSessionOverview } from '../../../redux/dataSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import Box from '@mui/material/Box';
@@ -9,7 +9,6 @@ import Button from '@mui/material/Button';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import Typography from '@mui/material/Typography';
 import { RootState } from '../../../redux/store';
-import { Session } from '../../../model';
 
 // Define styled elements outside the render function.
 // Otherwise, each re-render will create a new styled element, causing lose of focus.
@@ -69,8 +68,6 @@ interface OverviewTabProps {
 }
 
 const OverviewTab: React.FC<OverviewTabProps> = (props) => {
-  console.log('Overview page.');
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Get the session Id from URL parameters.
@@ -99,7 +96,6 @@ const OverviewTab: React.FC<OverviewTabProps> = (props) => {
 
   // Render the page.
   const handleRenameSession = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    console.log("handle rename session.");
     dispatch(
       renameSession({
         sessionId: sessionId,
@@ -146,8 +142,13 @@ const OverviewTab: React.FC<OverviewTabProps> = (props) => {
               value={overviewState.overview}
               onChange={handleUpdateSessionOverview}
               InputProps={{
-                disableUnderline: true,
-                style: {}
+                disableUnderline: true
+              }}
+              sx={{
+                '& .MuiFilledInput-root': {
+                  borderRadius: 1,
+                  overflow: 'hidden'
+                }
               }}
             />
           </Box>

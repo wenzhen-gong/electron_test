@@ -2,13 +2,14 @@ import React from 'react';
 import styled from 'styled-components';
 import SessionsSide from './SessionsSide';
 import HistorySide from './HistorySide';
+import { palette } from '../theme';
 
 const SideBarDiv = styled.div`
-  background-color: #2a2828;
+  background-color: ${palette.surface};
   width: 300px;
-  border-right-style: solid;
-  border-right-color: #535353;
-  border-right-with: 2px;
+  flex-shrink: 0;
+  border-right: 1px solid ${palette.border};
+  overflow-y: auto;
 `;
 
 interface SideBarProps {

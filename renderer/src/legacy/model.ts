@@ -13,6 +13,8 @@ export interface Result {
   success: number;
   failures: number;
   percentileTimeMs: Record<number, number>;
+  // 每秒完成的请求数（吞吐量），由 loadtester 按墙钟时间计算。
+  throughput?: number;
   requestStats: RequestStats[];
 }
 
@@ -106,11 +108,16 @@ export interface Session {
 }
 
 // RunTab相关的类型定义
+// 负载模型：'concurrency' = 闭环固定并发；'rate' = 开环固定到达速率(RPS)。
+export type LoadMode = 'concurrency' | 'rate';
+
 export interface RunTabConfig {
   serverUrl?: string;
-  testDuration?: number;
+  mode?: LoadMode;
+  testDuration?: number; // 秒
   concurrencyNumber?: number;
   totalRequests?: number;
+  requestsPerSecond?: number; // 开环模式：每秒请求数
   [key: string]: string | number | undefined;
 }
 
@@ -135,8 +142,6 @@ export interface SigninFormData {
 }
 
 export interface ValidUserInput {
-  valid: boolean;
-  flag: boolean;
   error: string | null;
 }
 export interface User {
@@ -150,6 +155,7 @@ export interface State {
   configFile?: Session;
   runTabConfig: RunTabConfig;
   validUserInput: ValidUserInput;
+  runTestRunning: boolean;
   result?: Result;
   signupError: string | null;
   openSignup: boolean;

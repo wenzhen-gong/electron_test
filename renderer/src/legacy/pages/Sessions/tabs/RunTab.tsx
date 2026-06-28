@@ -1,25 +1,38 @@
-import React, { useEffect, useRef } from 'react';
-import store from '../../../redux/store';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setValidUserInput, setRunTabData, runTest, addRequest } from '../../../redux/dataSlice';
 import { useParams } from 'react-router-dom';
-import { Box, TextField, Button, Stack, Typography } from '@mui/material';
-import { RootState } from '../../../redux/store';
+import {
+  Box,
+  TextField,
+  Button,
+  Stack,
+  Typography,
+  ToggleButton,
+  ToggleButtonGroup,
+  CircularProgress
+} from '@mui/material';
+import { RootState, AppDispatch } from '../../../redux/store';
+import { LoadMode } from '../../../model';
 import RequestItem from '../../../sidebars/RequestItem';
 
 interface RunTabProps {
   setCurrentTab?: (tab: number) => void;
 }
+ 
+const URL_REGEX = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
 
 const RunTab: React.FC<RunTabProps> = () => {
   const urlParams = useParams();
   const sessionId = urlParams.id || 'default session';
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const user = useSelector((state: RootState) => state.user);
   const runTabConfig = useSelector((state: RootState) => state.runTabConfig);
   const validUserInput = useSelector((state: RootState) => state.validUserInput);
-  const prevSessionIdRef = useRef<string>(sessionId);
+  const runTestRunning = useSelector((state: RootState) => state.runTestRunning);
+
+  const mode: LoadMode = runTabConfig.mode === 'rate' ? 'rate' : 'concurrency';
 
   // Get the current session data
   const currentSession = useSelector((state: RootState) => {
@@ -32,154 +45,187 @@ const RunTab: React.FC<RunTabProps> = () => {
     return null;
   });
 
-  useEffect(() => {
-    // If sessionId changed, update the ref and don't trigger runTest
-    if (prevSessionIdRef.current !== sessionId) {
-      prevSessionIdRef.current = sessionId;
-      return;
-    }
-
-    // Only trigger runTest if validUserInput.valid is true and sessionId hasn't changed
-    if (validUserInput.valid) {
-      store.dispatch(runTest(sessionId));
-    }
-  }, [validUserInput.valid, validUserInput.flag, sessionId]);
-
-  // use setRunTabData reducer to manage runTabConfig state centrally
   const handleInputChange = (inputName: string, inputValue: string | number): void => {
-    const config = { ...runTabConfig };
-    if (inputName === 'serverUrl') {
+    const config: Record<string, string | number | undefined> = { ...runTabConfig };
+    if (inputName === 'serverUrl' || inputName === 'mode') {
       config[inputName] = inputValue as string;
     } else {
       config[inputName] = Number(inputValue);
     }
-    store.dispatch(setRunTabData(config));
+    dispatch(setRunTabData(config));
   };
 
-  const validateUserInput = (): void => {
-    // 校验 Server URL
-    if (
-      typeof runTabConfig.serverUrl !== 'string' ||
-      !/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(runTabConfig.serverUrl)
-    ) {
-      store.dispatch(
-        setValidUserInput({
-          valid: false,
-          flag: !validUserInput.flag,
-          error: 'Server URL must be a valid string URL'
-        })
-      );
+  const handleModeChange = (_e: React.MouseEvent<HTMLElement>, newMode: LoadMode | null): void => {
+    if (newMode) {
+      handleInputChange('mode', newMode);
+    }
+  };
+
+  const fail = (error: string): void => {
+    dispatch(setValidUserInput({ error }));
+  };
+
+  const isPositiveInt = (value: unknown): boolean =>
+    typeof value === 'number' && Number.isInteger(value) && value > 0;
+
+  const handleRun = (): void => {
+    if (runTestRunning) {
       return;
     }
-    // 校验必须为正整数的字段
-    const positiveIntegerFields = ['testDuration', 'concurrencyNumber', 'totalRequests'];
-    for (const field of positiveIntegerFields) {
-      const value = runTabConfig[field];
-      if (!Number.isInteger(value) || (value as number) <= 0) {
-        store.dispatch(
-          setValidUserInput({
-            valid: false,
-            flag: !validUserInput.flag,
-            error: `${field} must be a positive integer`
-          })
-        );
+
+    // Server URL
+    if (typeof runTabConfig.serverUrl !== 'string' || !URL_REGEX.test(runTabConfig.serverUrl)) {
+      fail('Server URL must be a valid http(s) URL');
+      return;
+    }
+
+    if (mode === 'concurrency') {
+      if (!isPositiveInt(runTabConfig.concurrencyNumber)) {
+        fail('Concurrency Number must be a positive integer');
+        return;
+      }
+      const hasCount = isPositiveInt(runTabConfig.totalRequests);
+      const hasDuration = isPositiveInt(runTabConfig.testDuration);
+      if (!hasCount && !hasDuration) {
+        fail('Provide a positive Total Requests or Test Duration');
+        return;
+      }
+    } else {
+      if (!isPositiveInt(runTabConfig.requestsPerSecond)) {
+        fail('Requests / sec must be a positive integer');
+        return;
+      }
+      if (!isPositiveInt(runTabConfig.testDuration)) {
+        fail('Test Duration must be a positive integer');
         return;
       }
     }
 
-    // 校验 user
     if (!user) {
-      store.dispatch(
-        setValidUserInput({
-          valid: false,
-          flag: !validUserInput.flag,
-          error: 'Please log in first.'
-        })
-      );
+      fail('Please log in first.');
       return;
     }
 
-    // 如果所有检查通过
-    store.dispatch(
-      setValidUserInput({
-        valid: true,
-        flag: !validUserInput.flag
-      })
-    );
-    return;
+    dispatch(setRunTabData({ ...runTabConfig, mode }));
+    dispatch(setValidUserInput({ error: null }));
+    dispatch(runTest(sessionId));
   };
 
   return (
     <Box display={'flex'} gap={4}>
       <Box
         component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleRun();
+        }}
         sx={{
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          width: '300px',
+          width: '320px',
           marginLeft: '20px'
         }}
       >
+        <Box>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, display: 'block' }}>
+            Load model
+          </Typography>
+          <ToggleButtonGroup
+            value={mode}
+            exclusive
+            onChange={handleModeChange}
+            size="small"
+            fullWidth
+            disabled={runTestRunning}
+          >
+            <ToggleButton value="concurrency">Concurrency</ToggleButton>
+            <ToggleButton value="rate">Request rate</ToggleButton>
+          </ToggleButtonGroup>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}>
+            {mode === 'concurrency'
+              ? 'Closed loop: N clients each send back-to-back until a limit is hit.'
+              : 'Open loop: requests are dispatched at a fixed rate for the duration.'}
+          </Typography>
+        </Box>
+
         <TextField
           label="Server URL"
           variant="outlined"
           value={runTabConfig.serverUrl || ''}
-          onChange={(e) => {
-            handleInputChange('serverUrl', e.target.value);
-          }}
+          onChange={(e) => handleInputChange('serverUrl', e.target.value)}
           fullWidth
+          disabled={runTestRunning}
         />
 
-        <TextField
-          label="Test Duration"
-          type="number"
-          variant="outlined"
-          value={runTabConfig.testDuration || ''}
-          onChange={(e) => {
-            handleInputChange('testDuration', e.target.value);
-          }}
-          fullWidth
-        />
+        {mode === 'concurrency' ? (
+          <>
+            <TextField
+              label="Concurrency Number"
+              type="number"
+              variant="outlined"
+              value={runTabConfig.concurrencyNumber || ''}
+              onChange={(e) => handleInputChange('concurrencyNumber', e.target.value)}
+              fullWidth
+              disabled={runTestRunning}
+            />
+            <TextField
+              label="Total Requests"
+              type="number"
+              variant="outlined"
+              helperText="Stop after this many session iterations (leave empty to use duration)"
+              value={runTabConfig.totalRequests || ''}
+              onChange={(e) => handleInputChange('totalRequests', e.target.value)}
+              fullWidth
+              disabled={runTestRunning}
+            />
+            <TextField
+              label="Test Duration (s)"
+              type="number"
+              variant="outlined"
+              helperText="Stop after this many seconds (leave empty to use total requests)"
+              value={runTabConfig.testDuration || ''}
+              onChange={(e) => handleInputChange('testDuration', e.target.value)}
+              fullWidth
+              disabled={runTestRunning}
+            />
+          </>
+        ) : (
+          <>
+            <TextField
+              label="Requests / sec"
+              type="number"
+              variant="outlined"
+              value={runTabConfig.requestsPerSecond || ''}
+              onChange={(e) => handleInputChange('requestsPerSecond', e.target.value)}
+              fullWidth
+              disabled={runTestRunning}
+            />
+            <TextField
+              label="Test Duration (s)"
+              type="number"
+              variant="outlined"
+              value={runTabConfig.testDuration || ''}
+              onChange={(e) => handleInputChange('testDuration', e.target.value)}
+              fullWidth
+              disabled={runTestRunning}
+            />
+          </>
+        )}
 
-        <TextField
-          label="Concurrency Number"
-          type="number"
-          variant="outlined"
-          value={runTabConfig.concurrencyNumber || ''}
-          onChange={(e) => {
-            handleInputChange('concurrencyNumber', e.target.value);
-          }}
-          fullWidth
-        />
-
-        <TextField
-          label="Total Requests"
-          type="number"
-          variant="outlined"
-          value={runTabConfig.totalRequests || ''}
-          onChange={(e) => {
-            handleInputChange('totalRequests', e.target.value);
-          }}
-          fullWidth
-        />
-        <Stack direction="row" spacing={2} sx={{ marginTop: 2 }} justifyContent="flex-start">
+        <Stack direction="row" spacing={2} sx={{ marginTop: 1 }} alignItems="center">
           <Button
             variant="contained"
             color="primary"
-            onClick={() => {
-              validateUserInput();
-              console.log('after clicking: ', validUserInput.valid);
-            }}
+            onClick={handleRun}
+            disabled={runTestRunning}
+            startIcon={runTestRunning ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
-            Run
+            {runTestRunning ? 'Running…' : 'Run'}
           </Button>
         </Stack>
         {validUserInput.error && (
-          <Typography
-            variant="body2"
-            sx={{ color: 'error.main', marginTop: 1, marginLeft: '20px' }}
-          >
+          <Typography variant="body2" sx={{ color: 'error.main', marginTop: 1 }}>
             {validUserInput.error}
           </Typography>
         )}
@@ -222,6 +268,7 @@ const RunTab: React.FC<RunTabProps> = () => {
             }
           }}
           sx={{ marginTop: 2 }}
+          disabled={runTestRunning}
         >
           Add Request
         </Button>

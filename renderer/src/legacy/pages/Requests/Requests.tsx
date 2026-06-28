@@ -12,18 +12,13 @@ import {
   InputLabel,
   FormControl,
   OutlinedInput,
-  Typography,
-  Grid
+  Typography
 } from '@mui/material';
 import { RootState } from '../../redux/store';
 import { Header, Param } from '../../model';
 import { Request } from '../../model';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
-interface RequestsProps {
-  // Add props if needed
-}
 
 const RequestDiv = styled.div`
   height: 100%;
@@ -32,7 +27,7 @@ const RequestDiv = styled.div`
   flex-direction: column;
 `;
 
-const Requests: React.FC<RequestsProps> = () => {
+const Requests: React.FC = () => {
   const urlParams = useParams();
   const sessionId = urlParams.id ? Number(urlParams.id) : null;
   const requestId = urlParams.requestId ? Number(urlParams.requestId) : null;
@@ -60,8 +55,6 @@ const Requests: React.FC<RequestsProps> = () => {
     }
     return null;
   });
-
-  console.log('Current request: ', currentRequest);
 
   // Convert headers and params from Request format to local state format
   const headers: Header[] = currentRequest?.headers || [];
@@ -109,7 +102,7 @@ const Requests: React.FC<RequestsProps> = () => {
   };
 
   const handleHeaderChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: keyof Header,
     index: number
   ): void => {
@@ -123,7 +116,6 @@ const Requests: React.FC<RequestsProps> = () => {
   };
 
   const handleRemoveHeader = (index: number): void => {
-    console.log('removing index: ', index);
     updateRequestInSession({ headers: headers.filter((_, i) => i !== index) });
   };
 
@@ -149,7 +141,7 @@ const Requests: React.FC<RequestsProps> = () => {
   };
 
   const handleParamChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: keyof Param,
     index: number
   ): void => {
@@ -248,6 +240,7 @@ const Requests: React.FC<RequestsProps> = () => {
               <MenuItem value="GET">GET</MenuItem>
               <MenuItem value="POST">POST</MenuItem>
               <MenuItem value="PUT">PUT</MenuItem>
+              <MenuItem value="PATCH">PATCH</MenuItem>
               <MenuItem value="DELETE">DELETE</MenuItem>
             </Select>
           </FormControl>
@@ -291,8 +284,8 @@ const Requests: React.FC<RequestsProps> = () => {
             }}
           >
             {headers.map((header, index) => (
-              <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
-                <Grid item xs={6}>
+              <Box key={index} sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
                   <TextField
                     label="Key"
                     variant="outlined"
@@ -300,8 +293,6 @@ const Requests: React.FC<RequestsProps> = () => {
                     value={header.key}
                     onChange={(e) => handleHeaderChange(e, 'key', index)}
                   />
-                </Grid>
-                <Grid item xs={6}>
                   <TextField
                     label="Value"
                     variant="outlined"
@@ -309,11 +300,17 @@ const Requests: React.FC<RequestsProps> = () => {
                     value={header.value}
                     onChange={(e) => handleHeaderChange(e, 'value', index)}
                   />
-                </Grid>
-                <Button variant="outlined" onClick={() => handleRemoveHeader(index)}>
-                  - Remove Header
+                </Box>
+                <Button
+                  variant="text"
+                  color="error"
+                  size="small"
+                  onClick={() => handleRemoveHeader(index)}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  Remove
                 </Button>
-              </Grid>
+              </Box>
             ))}
           </Box>
           <Button variant="outlined" onClick={handleAddHeader}>
@@ -331,8 +328,8 @@ const Requests: React.FC<RequestsProps> = () => {
             }}
           >
             {params.map((param, index) => (
-              <Grid container spacing={2} key={index} sx={{ marginBottom: 1 }}>
-                <Grid item xs={6}>
+              <Box key={index} sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
                   <TextField
                     label="Key"
                     variant="outlined"
@@ -340,8 +337,6 @@ const Requests: React.FC<RequestsProps> = () => {
                     value={param.key}
                     onChange={(e) => handleParamChange(e, 'key', index)}
                   />
-                </Grid>
-                <Grid item xs={6}>
                   <TextField
                     label="Value"
                     variant="outlined"
@@ -349,11 +344,17 @@ const Requests: React.FC<RequestsProps> = () => {
                     value={param.value}
                     onChange={(e) => handleParamChange(e, 'value', index)}
                   />
-                </Grid>
-                <Button variant="outlined" onClick={() => handleRemoveParam(index)}>
-                  - Remove A Param
+                </Box>
+                <Button
+                  variant="text"
+                  color="error"
+                  size="small"
+                  onClick={() => handleRemoveParam(index)}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  Remove
                 </Button>
-              </Grid>
+              </Box>
             ))}
           </Box>
 

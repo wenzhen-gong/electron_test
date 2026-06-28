@@ -68,8 +68,6 @@ const SessionsDiv = styled.div`
 
 const Sessions: React.FC = () => {
   const dispatch = useDispatch();
-  const configFile = useSelector((state: RootState) => state.configFile);
-  console.log('Current configFile on SessionTab:', configFile);
   // Get the session Id from URL parameters.
   const params = useParams();
   const sessionId = params.id;
@@ -98,9 +96,7 @@ const Sessions: React.FC = () => {
   // Clear session-related state when session changes, and switch to Overview tab
   useEffect(() => {
     // Only reset tab if sessionId actually changed (different session)
-    console.log('previous sessionId:', prevSessionIdRef.current, 'current sessionId:', sessionId);
     if (prevSessionIdRef.current !== sessionId && sessionId) {
-      console.log('reset session page stage.');
       // Clear state first to prevent RunTab from triggering runTest with old state
       dispatch(clearSessionState());
       // Switch to Overview tab only when changing to a different session

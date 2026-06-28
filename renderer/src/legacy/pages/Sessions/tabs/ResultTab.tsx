@@ -25,6 +25,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 interface ResultTabProps {
   // Add props if needed
@@ -76,6 +77,7 @@ const ResultTab: React.FC<ResultTabProps> = () => {
   const success = result.success ?? 0;
   const failures = result.failures ?? 0;
   const percentileTimeMs = result.percentileTimeMs || {};
+  const throughput = result.throughput;
 
   const totalRequests = success + failures;
   const successRate = totalRequests > 0 ? (success / totalRequests) * 100 : 0;
@@ -152,7 +154,11 @@ const ResultTab: React.FC<ResultTabProps> = () => {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(4, minmax(0, 1fr))' },
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, minmax(0, 1fr))',
+              md: 'repeat(5, minmax(0, 1fr))'
+            },
             gap: 3,
             flexShrink: 0
           }}
@@ -236,10 +242,27 @@ const ResultTab: React.FC<ResultTabProps> = () => {
             <Card sx={{ flexGrow: 1 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Total Sessions
+                  Total Requests
                 </Typography>
                 <Typography variant="h4" color="text.primary">
                   {totalRequests}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+
+          <Box sx={{ display: 'flex' }}>
+            <Card sx={{ flexGrow: 1 }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <SpeedIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="h6">Throughput</Typography>
+                </Box>
+                <Typography variant="h4" color="primary">
+                  {typeof throughput === 'number' ? throughput.toFixed(1) : 'N/A'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  requests / sec
                 </Typography>
               </CardContent>
             </Card>

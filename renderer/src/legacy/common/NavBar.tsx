@@ -4,74 +4,61 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import ListIcon from '@mui/icons-material/List';
 import RestoreIcon from '@mui/icons-material/Restore';
+import { palette } from '../theme';
 
 const NavDiv = styled.div`
-  background-color: #2a2828;
-  width: 100px;
-  border-right-style: solid;
-  border-right-color: #535353;
-  border-right-with: 1px;
+  background-color: ${palette.surface};
+  width: 92px;
+  border-right: 1px solid ${palette.border};
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  flex-shrink: 0;
 `;
 
 interface NavBarProps {
   page: string;
 }
 
+const navButtons = [
+  { key: 'sessions', label: 'Sessions', path: '/sessions', Icon: ListIcon },
+  { key: 'history', label: 'History', path: '/history', Icon: RestoreIcon }
+];
+
 const NavBarDiv: React.FC<NavBarProps> = (props: NavBarProps) => {
   const navigate = useNavigate();
 
-  // Configure button styles.
-  const sessionButtonStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '90px',
-    height: '90px',
-    flexShrink: 0,
-    color: '#FFF',
-    padding: '10px',
-    backgroundColor: ''
-  };
-  const historyButtonStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '90px',
-    height: '90px',
-    flexShrink: 0,
-    color: '#FFF',
-    padding: '5px',
-    backgroundColor: ''
-  };
-  // Highlight selected button.
-  if (props.page === 'sessions') {
-    sessionButtonStyle.backgroundColor = 'rgba(255, 255, 255, 0.20)';
-  } else if (props.page === 'history') {
-    historyButtonStyle.backgroundColor = 'rgba(255, 255, 255, 0.20)';
-  }
-
   return (
     <NavDiv>
-      <Button
-        variant="text"
-        onClick={() => {
-          navigate('/sessions');
-        }}
-        sx={sessionButtonStyle}
-      >
-        <ListIcon fontSize="large" />
-        <label>Sessions</label>
-      </Button>
-      <Button
-        variant="text"
-        onClick={() => {
-          navigate('/history');
-        }}
-        sx={historyButtonStyle}
-      >
-        <RestoreIcon fontSize="large" />
-        <label>History</label>
-      </Button>
+      {navButtons.map(({ key, label, path, Icon }) => {
+        const isActive = props.page === key;
+        return (
+          <Button
+            key={key}
+            variant="text"
+            onClick={() => navigate(path)}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0.5,
+              width: 76,
+              height: 72,
+              borderRadius: 2,
+              color: isActive ? 'primary.main' : 'text.secondary',
+              backgroundColor: isActive ? 'rgba(113, 170, 255, 0.12)' : 'transparent',
+              fontSize: 12,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.06)'
+              }
+            }}
+          >
+            <Icon fontSize="medium" />
+            {label}
+          </Button>
+        );
+      })}
     </NavDiv>
   );
 };

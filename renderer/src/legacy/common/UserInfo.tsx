@@ -15,13 +15,18 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
-import { User } from '../model';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { setOpenProfile, setUser } from '../redux/dataSlice';
 import store from '../redux/store';
+import { apiUrl } from '../config';
 
-const UserInfo: React.FC<User> = ({ username, email }) => {
+interface UserInfoProps {
+  username: string;
+  email: string;
+}
+
+const UserInfo: React.FC<UserInfoProps> = ({ username, email }) => {
   const user = useSelector((state: RootState) => state.user);
   const openProfile = useSelector((state: RootState) => state.openProfile);
 
@@ -90,16 +95,13 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
 
   const handleLogOut = async (): Promise<void> => {
     try {
-      const response = await fetch(
-        'https://kaskade-backend-483052428154.asia-east1.run.app/logout',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        }
-      );
+      const response = await fetch(apiUrl('/logout'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
 
       const result = await response.json();
 
@@ -117,17 +119,14 @@ const UserInfo: React.FC<User> = ({ username, email }) => {
     setSubmitLoading(true);
 
     try {
-      const response = await fetch(
-        `https://kaskade-backend-483052428154.asia-east1.run.app/users/${user?.username}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(profileForm),
-          credentials: 'include'
-        }
-      );
+      const response = await fetch(apiUrl(`/users/${user?.username}`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(profileForm),
+        credentials: 'include'
+      });
 
       const result = await response.json();
 

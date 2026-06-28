@@ -1,10 +1,31 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Request, Session, State, Result, ResultMetadata } from '../model';
+import { apiUrl } from '../config';
+
+/** 仅在已登录时将 session 数据持久化到本地 datafile.json。 */
+function persistDatafileIfLoggedIn(state: State): void {
+  if (state.user) {
+    window.api.writeDataFile(JSON.stringify(state.datafile));
+  }
+}
+
+export const loadDataFile = createAsyncThunk(
+  'datafile/loadDataFile',
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState() as State;
+    if (!state.user) {
+      return rejectWithValue('Not logged in');
+    }
+    const raw = await window.api.readDataFile();
+    return JSON.parse(raw) as Session[];
+  }
+);
 
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {},
-  validUserInput: { valid: false, flag: false, error: null },
+  validUserInput: { error: null },
+  runTestRunning: false,
   result: undefined,
   // 这里开始是signup signin的model里面的state
   signupError: null,
@@ -24,55 +45,57 @@ const initialState: State = {
   openProfile: false
 };
 
-export const runTest = createAsyncThunk('datafile/runTest', async (sessionId: string, thunkAPI) => {
-  const state = thunkAPI.getState() as State;
-  const finalRunTabConfig = { ...state.runTabConfig };
+export const runTest = createAsyncThunk(
+  'datafile/runTest',
+  async (sessionId: string, thunkAPI) => {
+    const state = thunkAPI.getState() as State;
+    const finalRunTabConfig = { ...state.runTabConfig };
 
-  // Get all requests for the current session
-  const sessionIdNum = Number(sessionId);
-  const currentSession = state.datafile.find((session) => session.sessionId === sessionIdNum);
-  const requests = currentSession?.requests || [];
+    // Get all requests for the current session
+    const sessionIdNum = Number(sessionId);
+    const currentSession = state.datafile.find((session) => session.sessionId === sessionIdNum);
+    const requests = currentSession?.requests || [];
 
-  console.log('finalRunTabConfig in runTest Thunk: ', finalRunTabConfig);
-  console.log('requests in runTest Thunk: ', requests);
+    const result: Result = await window.api.runLoadTest({
+      ...finalRunTabConfig,
+      requests: requests
+    });
 
-  // TODO: set validUserInput to false to prevent duplicate triggering of runs.
-
-  const result: Result = await window.api.runLoadTest({
-    ...finalRunTabConfig,
-    requests: requests
-  });
-
-  // Send a fetch request to backend to save result
-  const saveResultRequest = {
-    userId: state.user?.id,
-    sessionId: sessionId,
-    version: '1.0.0',
-    config: finalRunTabConfig,
-    result: result
-  };
-  const saveResultResponse = await fetch(
-    'https://kaskade-backend-483052428154.asia-east1.run.app/benchmarkresult',
-    {
+    // Send a fetch request to backend to save result
+    const saveResultRequest = {
+      userId: state.user?.id,
+      sessionId: sessionId,
+      version: '1.0.0',
+      config: finalRunTabConfig,
+      result: result
+    };
+    const saveResultResponse = await fetch(apiUrl('/benchmarkresult'), {
       method: 'POST',
-      body: JSON.stringify(saveResultRequest)
-    }
-  ).then((res) => res.json());
-  console.log(`saveResultResponse: ${saveResultResponse}`);
-  const resultMetadata: ResultMetadata = {
-    id: saveResultResponse.id,
-    userId: saveResultResponse.userId,
-    timestamp: saveResultResponse.timestamp,
-    sessionId: saveResultResponse.sessionId,
-    version: saveResultResponse.version,
-    successRatio: saveResultResponse.successRatio,
-    p50Latency: saveResultResponse.p50Latency,
-    p95Latency: saveResultResponse.p95Latency,
-    throughput: saveResultResponse.throughput
-  };
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(saveResultRequest),
+      credentials: 'include'
+    }).then((res) => res.json());
+    const resultMetadata: ResultMetadata = {
+      id: saveResultResponse.id,
+      userId: saveResultResponse.userId,
+      timestamp: saveResultResponse.timestamp,
+      sessionId: saveResultResponse.sessionId,
+      version: saveResultResponse.version,
+      successRatio: saveResultResponse.successRatio,
+      p50Latency: saveResultResponse.p50Latency,
+      p95Latency: saveResultResponse.p95Latency,
+      throughput: saveResultResponse.throughput
+    };
 
-  return { result, resultMetadata };
-});
+    return { result, resultMetadata };
+  },
+  {
+    // 防止重复点击或 effect 重入导致同一轮压测被触发多次、落库多条记录。
+    condition: (_, { getState }) => !(getState() as State).runTestRunning
+  }
+);
 
 const dataSlice = createSlice({
   name: 'datafile',
@@ -109,8 +132,7 @@ const dataSlice = createSlice({
       };
       state.datafile.push(newSession);
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
 
     addRequest: (state, action) => {
@@ -131,8 +153,7 @@ const dataSlice = createSlice({
           state.datafile[i].requests.push(newRequest);
         }
       }
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
 
     duplicateSession: (state, action) => {
@@ -144,8 +165,7 @@ const dataSlice = createSlice({
       newSession.lastModified = newSession.sessionId;
       state.datafile.push(newSession);
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
 
     deleteSession: (state, action) => {
@@ -156,8 +176,7 @@ const dataSlice = createSlice({
         }
       }
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
 
     renameSession: (state, action) => {
@@ -170,8 +189,7 @@ const dataSlice = createSlice({
         }
       }
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
 
     updateSessionOverview: (state, action) => {
@@ -184,8 +202,7 @@ const dataSlice = createSlice({
         }
       }
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
 
     deleteRequest: (state, action) => {
@@ -203,8 +220,7 @@ const dataSlice = createSlice({
         }
       }
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
     updateRequest: (state, action) => {
       const sessionId = action.payload.sessionId;
@@ -226,8 +242,7 @@ const dataSlice = createSlice({
         }
       }
 
-      // call main process to write data file
-      window.api.writeDataFile(JSON.stringify(state.datafile));
+      persistDatafileIfLoggedIn(state);
     },
     setSignupError: (state, action) => {
       state.signupError = action.payload;
@@ -256,6 +271,14 @@ const dataSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
+      if (!action.payload) {
+        // 登出后不再保留本地 session 数据（也不写入磁盘）。
+        state.datafile = [];
+        state.result = undefined;
+        state.resultMetadata = undefined;
+        state.runTabConfig = {};
+        state.validUserInput.error = null;
+      }
     },
     setOpenProfile: (state, action) => {
       state.openProfile = action.payload;
@@ -268,17 +291,28 @@ const dataSlice = createSlice({
       state.result = undefined;
       state.resultMetadata = undefined;
       state.runTabConfig = {};
-      state.validUserInput.valid = false;
-      state.validUserInput.flag = !state.validUserInput.flag;
+      state.validUserInput.error = null;
     }
   },
   // Reducers for asyncthunk
   extraReducers: (builder) => {
-    builder.addCase(runTest.fulfilled, (state, action) => {
-      console.log(action.payload);
-      state.result = action.payload.result;
-      state.resultMetadata = action.payload.resultMetadata;
-    });
+    builder
+      .addCase(loadDataFile.fulfilled, (state, action) => {
+        state.datafile = action.payload;
+      })
+      .addCase(runTest.pending, (state) => {
+        state.runTestRunning = true;
+        state.validUserInput.error = null;
+      })
+      .addCase(runTest.fulfilled, (state, action) => {
+        state.runTestRunning = false;
+        state.result = action.payload.result;
+        state.resultMetadata = action.payload.resultMetadata;
+      })
+      .addCase(runTest.rejected, (state, action) => {
+        state.runTestRunning = false;
+        state.validUserInput.error = action.error.message ?? 'Load test failed';
+      });
   }
 });
 

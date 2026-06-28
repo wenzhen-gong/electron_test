@@ -10,7 +10,8 @@ import {
   setOpenSignin,
   setSigninLoading,
   setSigninFormData,
-  setUser
+  setUser,
+  loadDataFile
 } from '../redux/dataSlice';
 import {
   Button,
@@ -23,6 +24,7 @@ import {
   Alert
 } from '@mui/material';
 import { RootState } from '../redux/store';
+import { apiUrl } from '../config';
 
 const SignInSignUp: React.FC = () => {
   const openSignup = useSelector((state: RootState) => state.openSignup);
@@ -74,16 +76,14 @@ const SignInSignUp: React.FC = () => {
     store.dispatch(setSignupLoading(true));
 
     try {
-      const response = await fetch(
-        'https://kaskade-backend-483052428154.asia-east1.run.app/signup',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(signupFormData)
-        }
-      );
+      const response = await fetch(apiUrl('/signup'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(signupFormData),
+        credentials: 'include'
+      });
 
       const result = await response.json();
 
@@ -107,17 +107,14 @@ const SignInSignUp: React.FC = () => {
     store.dispatch(setSigninLoading(true));
 
     try {
-      const response = await fetch(
-        'https://kaskade-backend-483052428154.asia-east1.run.app/login',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(signinFormData),
-          credentials: 'include'
-        }
-      );
+      const response = await fetch(apiUrl('/login'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(signinFormData),
+        credentials: 'include'
+      });
 
       const result = await response.json();
 
@@ -125,8 +122,9 @@ const SignInSignUp: React.FC = () => {
         throw new Error(result.error || 'Sign in failed');
       }
 
-      // 登陆成功
+      // 登录成功后加载本地 session 数据。
       store.dispatch(setUser(result));
+      await store.dispatch(loadDataFile()).unwrap();
       handleCloseSignin();
       // 可以在这里添加成功提示或自动登录逻辑
     } catch (err) {

@@ -5,31 +5,21 @@ import '@fontsource/roboto/700.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './legacy/App'; // 或根据实际情况用新版 App
+import App from './legacy/App';
 import { Provider } from 'react-redux';
 import store from './legacy/redux/store';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { setData } from './legacy/redux/dataSlice';
-import RunTab from './legacy/pages/Sessions/tabs/RunTab';
-async function bootstrap(): Promise<void> {
-  const data = await window.api.readDataFile();
-  store.dispatch(setData(JSON.parse(data as string)));
+import { theme } from './legacy/theme';
 
-  const darkTheme = createTheme({
-    palette: { mode: 'dark' }
-  });
-
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <Provider store={store}>
-        <ThemeProvider theme={darkTheme}>
-          <CssBaseline />
-          <App />
-        </ThemeProvider>
-      </Provider>
-    </StrictMode>
-  );
-}
-
-bootstrap();
+// session 数据仅在登录后从本地 datafile.json 加载，启动时不读取。
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </Provider>
+  </StrictMode>
+);
