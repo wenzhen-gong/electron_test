@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -46,13 +46,16 @@ const SessionItem: React.FC<SessionItemProps> = (props) => {
   const selectedSessionId = Number(params.id);
   const isSelected = selectedSessionId === thisSessionId;
 
-  const requests: React.ReactNode[] = [];
-  if (isSelected) {
-    // Track the currently selected session config when no request is focused.
-    if (!params.requestId) {
+  // 选中 session 时同步 configFile，供 HeadBar 搜索等使用；必须在 effect 里 dispatch，
+  // 不能在 render 中调用，否则会触发 “Cannot update HeadBar while rendering SessionItem”。
+  useEffect(() => {
+    if (isSelected && !params.requestId) {
       dispatch(currentSessionConfig(props.session));
     }
+  }, [isSelected, params.requestId, props.session, dispatch]);
 
+  const requests: React.ReactNode[] = [];
+  if (isSelected) {
     for (let i = 0; i < props.session.requests.length; ++i) {
       requests.push(
         <RequestItem

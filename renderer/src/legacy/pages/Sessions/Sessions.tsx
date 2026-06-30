@@ -9,10 +9,14 @@ import HistoryTab from './tabs/HistoryTab';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import { useSelector, useDispatch } from 'react-redux';
 import Typography from '@mui/material/Typography';
+import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
+import AddIcon from '@mui/icons-material/Add';
 import { RootState } from '../../redux/store';
-import { clearSessionState } from '../../redux/dataSlice';
+import store from '../../redux/store';
+import { clearSessionState, createSession } from '../../redux/dataSlice';
 
 // https://mui.com/material-ui/react-tabs/
 // Some helper functions to render tab bar & tab pannels.
@@ -66,23 +70,74 @@ const SessionsDiv = styled.div`
   flex-direction: column;
 `;
 
+interface SessionsWelcomeProps {
+  title: string;
+  description: string;
+  showCreateButton?: boolean;
+  onCreateSession?: () => void;
+}
+
+const SessionsWelcome: React.FC<SessionsWelcomeProps> = ({
+  title,
+  description,
+  showCreateButton,
+  onCreateSession
+}) => (
+  <Box
+    sx={{
+      flexGrow: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'text.secondary',
+      gap: 2,
+      p: 4
+    }}
+  >
+    <FolderOpenOutlinedIcon sx={{ fontSize: 64, opacity: 0.45 }} />
+    <Typography variant="h5" sx={{ color: 'text.primary' }}>
+      {title}
+    </Typography>
+    <Typography variant="body1" sx={{ maxWidth: 420, textAlign: 'center' }}>
+      {description}
+    </Typography>
+    {showCreateButton && onCreateSession && (
+      <Button variant="contained" startIcon={<AddIcon />} onClick={onCreateSession} sx={{ mt: 1 }}>
+        Create Session
+      </Button>
+    )}
+  </Box>
+);
+
 const Sessions: React.FC = () => {
   const dispatch = useDispatch();
-  // Get the session Id from URL parameters.
+  const navigate = useNavigate();
   const params = useParams();
   const sessionId = params.id;
+  const sessions = useSelector((state: RootState) => state.datafile);
+  const hasSessions = sessions.length > 0;
+  const sessionExists =
+    !!sessionId && sessions.some((s) => s.sessionId.toString() === sessionId);
+  const showSessionTabs = hasSessions && sessionExists;
 
-  // Get the session name to display on the title bar.
-  const sessionName = useSelector((state: RootState) => {
-    for (let i = 0; i < state.datafile.length; i++) {
-      if (state.datafile[i].sessionId.toString() === sessionId) {
-        return state.datafile[i].sessionName;
-      }
+  const handleCreateSession = (): void => {
+    dispatch(createSession());
+    const created = store.getState().datafile.at(-1);
+    if (created) {
+      navigate(`/sessions/${created.sessionId}`);
     }
-    return null;
-  });
+  };
 
-  const navigate = useNavigate();
+  // 无 session 或 URL 指向已删除的 session 时，回到 sessions 根路径。
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+    if (!hasSessions || !sessionExists) {
+      navigate('/sessions', { replace: true });
+    }
+  }, [sessionId, hasSessions, sessionExists, navigate]);
 
   // Tab bar's state that represents the currently selected tab.
   // 0 = overview, 1 = authorization, 2 = run, 3 = result, 4 = history.
@@ -117,8 +172,18 @@ const Sessions: React.FC = () => {
     }
   }, [result]);
 
-  // Check if the react router URL is on a request page (has requestId in params)
-  // If so, render the Outlet (whcih is the request page component).
+  const sessionName = useSelector((state: RootState) => {
+    if (!sessionId) {
+      return null;
+    }
+    for (let i = 0; i < state.datafile.length; i++) {
+      if (state.datafile[i].sessionId.toString() === sessionId) {
+        return state.datafile[i].sessionName;
+      }
+    }
+    return null;
+  });
+
   const requestId = params.requestId;
   if (requestId) {
     return (
@@ -128,7 +193,23 @@ const Sessions: React.FC = () => {
     );
   }
 
-  // Otherwise, render the session page (session tabs)
+  if (!showSessionTabs) {
+    return (
+      <SessionsDiv>
+        <SessionsWelcome
+          title={hasSessions ? 'Select a session' : 'Create a session to start'}
+          description={
+            hasSessions
+              ? 'Choose a session from the sidebar to view its overview, run tests, and browse results.'
+              : 'Sessions hold your requests and benchmark runs. Create one to begin building and testing API flows.'
+          }
+          showCreateButton={!hasSessions}
+          onCreateSession={handleCreateSession}
+        />
+      </SessionsDiv>
+    );
+  }
+
   return (
     <SessionsDiv>
       <Box
