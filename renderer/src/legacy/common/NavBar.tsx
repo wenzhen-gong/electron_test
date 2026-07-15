@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import ListIcon from '@mui/icons-material/List';
 import RestoreIcon from '@mui/icons-material/Restore';
+import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { palette } from '../theme';
 
 const NavDiv = styled.div`
@@ -24,7 +25,8 @@ interface NavBarProps {
 
 const navButtons = [
   { key: 'sessions', label: 'Sessions', path: '/sessions', Icon: ListIcon },
-  { key: 'history', label: 'History', path: '/history', Icon: RestoreIcon }
+  { key: 'history', label: 'History', path: '/history', Icon: RestoreIcon },
+  { key: 'chat', label: 'Assistant', path: '/chat', Icon: SmartToyOutlinedIcon }
 ];
 
 const NavBarDiv: React.FC<NavBarProps> = (props: NavBarProps) => {

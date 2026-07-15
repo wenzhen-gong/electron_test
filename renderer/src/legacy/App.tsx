@@ -8,6 +8,7 @@ import SideBar from './sidebars/SideBar';
 import History from './pages/History/History';
 import Sessions from './pages/Sessions/Sessions';
 import Requests from './pages/Requests/Requests';
+import Chat from './pages/Chat/Chat';
 import { palette } from './theme';
 
 // 顶栏高度，集中定义，避免布局高度计算与实际高度不一致（之前 HeadBar 为
@@ -75,6 +76,10 @@ const App: React.FC = () => {
           <Route path="/history" element={<Layout page="history" />}>
             <Route path="" element={<History />} />
             <Route path=":id" element={<History />} />
+          </Route>
+
+          <Route path="/chat" element={<Layout page="chat" />}>
+            <Route path="" element={<Chat />} />
           </Route>
         </Routes>
       </Router>

@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import SessionsSide from './SessionsSide';
 import HistorySide from './HistorySide';
+import ChatSide from './ChatSide';
 import { palette } from '../theme';
 
 const SideBarDiv = styled.div`
@@ -22,6 +23,8 @@ const SideBar: React.FC<SideBarProps> = (props) => {
     sideBarContent = <SessionsSide />;
   } else if (props.page === 'history') {
     sideBarContent = <HistorySide />;
+  } else if (props.page === 'chat') {
+    sideBarContent = <ChatSide />;
   } else {
     sideBarContent = <p>Unknown page</p>;
   }
