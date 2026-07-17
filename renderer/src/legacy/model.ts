@@ -154,6 +154,12 @@ export interface State {
   datafile: Session[];
   configFile?: Session;
   runTabConfig: RunTabConfig;
+  /** Chat tooling 创建 session 后，等导航完成再写入 runTabConfig，避免被 clearSessionState 清掉 */
+  pendingSessionBootstrap?: {
+    sessionId: number;
+    runTabConfig: RunTabConfig;
+    openRunTab?: boolean;
+  };
   validUserInput: ValidUserInput;
   runTestRunning: boolean;
   result?: Result;

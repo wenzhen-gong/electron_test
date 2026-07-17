@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Request, Session, State, Result, ResultMetadata } from '../model';
+import { Request, Session, State, Result, ResultMetadata, RunTabConfig } from '../model';
 import { apiUrl } from '../config';
 
 /** 仅在已登录时将 session 数据持久化到本地 datafile.json。 */
@@ -24,6 +24,7 @@ export const loadDataFile = createAsyncThunk(
 const initialState: State = {
   datafile: [], // Initial state that'll be updated to action payload (datafile)
   runTabConfig: {},
+  pendingSessionBootstrap: undefined,
   validUserInput: { error: null },
   runTestRunning: false,
   result: undefined,
@@ -133,6 +134,65 @@ const dataSlice = createSlice({
       state.datafile.push(newSession);
 
       persistDatafileIfLoggedIn(state);
+    },
+
+    /**
+     * Chat tooling：一次创建 New Session + New Request，并挂起 runTab 预填，
+     * 等导航到该 session 后再写入（避免 clearSessionState 清掉）。
+     */
+    createSessionFromChat: (state, action) => {
+      const payload = action.payload as {
+        sessionName?: string;
+        requestName?: string;
+        method?: Request['method'];
+        url?: string;
+        runTabConfig?: RunTabConfig;
+      };
+
+      const sessionId = Date.now();
+      const requestId = sessionId + 1;
+      const method = (payload.method || 'GET') as Request['method'];
+      const newRequest: Request = {
+        requestId,
+        requestName: payload.requestName?.trim() || 'New Request',
+        method,
+        url: payload.url || '',
+        reqBody: '',
+        headers: [],
+        params: [],
+        contentType: null
+      };
+      const newSession: Session = {
+        sessionId,
+        sessionName: payload.sessionName?.trim() || 'New Session',
+        overview: '',
+        createdBy: state.user?.username || 'anonymous',
+        createdOn: sessionId,
+        lastModified: sessionId,
+        requests: [newRequest],
+        servers: [],
+        history: []
+      };
+      state.datafile.push(newSession);
+      state.pendingSessionBootstrap = {
+        sessionId,
+        runTabConfig: payload.runTabConfig || {},
+        openRunTab: true
+      };
+      persistDatafileIfLoggedIn(state);
+    },
+
+    applyPendingSessionBootstrap: (state) => {
+      const pending = state.pendingSessionBootstrap;
+      if (!pending) {
+        return;
+      }
+      state.runTabConfig = { ...pending.runTabConfig };
+      state.pendingSessionBootstrap = undefined;
+    },
+
+    clearPendingSessionBootstrap: (state) => {
+      state.pendingSessionBootstrap = undefined;
     },
 
     addRequest: (state, action) => {
@@ -322,6 +382,9 @@ export const {
   setValidUserInput,
   currentSessionConfig,
   createSession,
+  createSessionFromChat,
+  applyPendingSessionBootstrap,
+  clearPendingSessionBootstrap,
   addRequest,
   duplicateSession,
   deleteSession,

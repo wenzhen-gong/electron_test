@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Alert,
   Box,
@@ -15,13 +16,63 @@ import SendIcon from '@mui/icons-material/Send';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { sendChatMessage } from '../../api/chat';
-import type { ChatMessage } from '../../model/chat';
+import type { ChatAction, ChatMessage } from '../../model/chat';
+import type { Request, RunTabConfig } from '../../model';
+import { createSessionFromChat } from '../../redux/dataSlice';
+import store, { AppDispatch } from '../../redux/store';
 import { palette } from '../../theme';
 
 const createMessageId = (): string =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+function applyChatActions(actions: ChatAction[] | undefined, dispatch: AppDispatch): number | null {
+  if (!actions?.length) {
+    return null;
+  }
+
+  let createdSessionId: number | null = null;
+  for (const action of actions) {
+    if (action.type !== 'create_session') {
+      continue;
+    }
+    const p = action.payload || {};
+    const method = (p.method || 'GET').toUpperCase() as Request['method'];
+    const runTabConfig: RunTabConfig = {
+      mode: p.mode === 'rate' ? 'rate' : 'concurrency'
+    };
+    if (p.serverUrl) {
+      runTabConfig.serverUrl = p.serverUrl;
+    }
+    if (typeof p.concurrencyNumber === 'number' && p.concurrencyNumber > 0) {
+      runTabConfig.concurrencyNumber = p.concurrencyNumber;
+    }
+    if (typeof p.totalRequests === 'number' && p.totalRequests > 0) {
+      runTabConfig.totalRequests = p.totalRequests;
+    }
+    if (typeof p.testDuration === 'number' && p.testDuration > 0) {
+      runTabConfig.testDuration = p.testDuration;
+    }
+    if (typeof p.requestsPerSecond === 'number' && p.requestsPerSecond > 0) {
+      runTabConfig.requestsPerSecond = p.requestsPerSecond;
+    }
+
+    dispatch(
+      createSessionFromChat({
+        sessionName: p.sessionName,
+        requestName: p.requestName,
+        method,
+        url: p.url || '',
+        runTabConfig
+      })
+    );
+    createdSessionId = store.getState().pendingSessionBootstrap?.sessionId ?? null;
+  }
+  return createdSessionId;
+}
+
 const Chat: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -66,15 +117,23 @@ const Chat: React.FC = () => {
           question: trimmed,
           history: history.slice(0, -1)
         });
+
+        const createdSessionId = applyChatActions(response.actions, dispatch);
+
         const assistantMessage: ChatMessage = {
           id: createMessageId(),
           role: 'assistant',
           content: response.answer,
           citations: response.citations,
+          actions: response.actions,
           createdAt: Date.now()
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
+
+        if (createdSessionId) {
+          navigate(`/sessions/${createdSessionId}`);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to send message');
       } finally {
@@ -82,7 +141,7 @@ const Chat: React.FC = () => {
         inputRef.current?.focus();
       }
     },
-    [loading, messages]
+    [loading, messages, dispatch, navigate]
   );
 
   useEffect(() => {
@@ -134,7 +193,7 @@ const Chat: React.FC = () => {
           <Typography variant="h6">Assistant</Typography>
         </Stack>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          询问 Kaskade 前端与后端代码的实现细节。
+          询问代码实现，或用自然语言创建压测 Session（URL / 并发 / 请求数 / 时长）。
         </Typography>
       </Box>
 
@@ -163,7 +222,8 @@ const Chat: React.FC = () => {
               有什么想了解的？
             </Typography>
             <Typography variant="body2">
-              可以从左侧选一个问题，或在下方输入关于代码库的问题。
+              例如：url 是 https://httpbin.org/get，10 个 concurrency，一共 100 个 request，duration
+              不超过 3 分钟。
             </Typography>
           </Box>
         )}
@@ -209,6 +269,20 @@ const Chat: React.FC = () => {
               >
                 <Typography variant="body2">{message.content}</Typography>
 
+                {message.actions && message.actions.length > 0 && (
+                  <Stack direction="row" flexWrap="wrap" gap={0.75} sx={{ mt: 1.5 }}>
+                    {message.actions.map((action, idx) => (
+                      <Chip
+                        key={`${action.type}-${idx}`}
+                        label={action.type === 'create_session' ? '已创建 Session' : action.type}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Stack>
+                )}
+
                 {message.citations && message.citations.length > 0 && (
                   <Stack direction="row" flexWrap="wrap" gap={0.75} sx={{ mt: 1.5 }}>
                     {message.citations.map((citation) => {
@@ -252,7 +326,7 @@ const Chat: React.FC = () => {
           <Stack direction="row" spacing={1.5} alignItems="center">
             <CircularProgress size={18} />
             <Typography variant="body2" color="text.secondary">
-              正在检索代码并生成回答…
+              正在思考并准备操作…
             </Typography>
           </Stack>
         )}

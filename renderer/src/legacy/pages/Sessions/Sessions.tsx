@@ -16,7 +16,7 @@ import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import { RootState } from '../../redux/store';
 import store from '../../redux/store';
-import { clearSessionState, createSession } from '../../redux/dataSlice';
+import { clearSessionState, createSession, applyPendingSessionBootstrap } from '../../redux/dataSlice';
 
 // https://mui.com/material-ui/react-tabs/
 // Some helper functions to render tab bar & tab pannels.
@@ -146,20 +146,33 @@ const Sessions: React.FC = () => {
     setCurrentTab(newValue);
   };
 
-  // Track previous sessionId to detect actual session changes
-  const prevSessionIdRef = useRef<string | undefined>(sessionId);
-  // Clear session-related state when session changes, and switch to Overview tab
+  // 必须从 undefined 起算：若初始化成当前 sessionId，从 Chat 导航进来时
+  // 「切换」与「首次挂载」两个分支都不会进，pending 预填会丢失。
+  const prevSessionIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
-    // Only reset tab if sessionId actually changed (different session)
-    if (prevSessionIdRef.current !== sessionId && sessionId) {
-      // Clear state first to prevent RunTab from triggering runTest with old state
-      dispatch(clearSessionState());
-      // Switch to Overview tab only when changing to a different session
+    if (!sessionId) {
+      return;
+    }
+    if (prevSessionIdRef.current === sessionId) {
+      return;
+    }
+
+    const isFirstEntry = prevSessionIdRef.current === undefined;
+    prevSessionIdRef.current = sessionId;
+
+    dispatch(clearSessionState());
+
+    const pending = store.getState().pendingSessionBootstrap;
+    const sessionIdNum = Number(sessionId);
+    if (pending && pending.sessionId === sessionIdNum) {
+      dispatch(applyPendingSessionBootstrap());
+      setCurrentTab(pending.openRunTab ? 2 : 0);
+      return;
+    }
+
+    // 普通切换 session 时回到 Overview；首次进入且无 pending 则保持默认 tab
+    if (!isFirstEntry) {
       setCurrentTab(0);
-      prevSessionIdRef.current = sessionId;
-    } else if (sessionId && !prevSessionIdRef.current) {
-      // Initial mount - set ref but don't reset tab
-      prevSessionIdRef.current = sessionId;
     }
   }, [sessionId, dispatch]);
 
